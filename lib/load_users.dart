@@ -31,7 +31,7 @@ class LoadUsersPage extends State<LoadUsers> with Quran {
       textDirection: TextDirection.rtl,
       child: WillPopScope(
         onWillPop: () async {
-          return false;
+          return true;
         },
         child: Scaffold(
           body: Container(

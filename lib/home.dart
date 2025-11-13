@@ -30,6 +30,7 @@ class Home extends StatelessWidget {
         child: Scaffold(
           backgroundColor: Theme.of(context).secondaryHeaderColor,
           appBar: AppBar(
+            scrolledUnderElevation: 0,
             automaticallyImplyLeading: false,
             backgroundColor: Theme.of(context).secondaryHeaderColor,
             elevation: 0,
@@ -84,60 +85,64 @@ class Home extends StatelessWidget {
             textDirection: TextDirection.rtl,
             child: Column(
               children: [
-                Container(
-                  width: width,
-                  height: height * 0.2,
-                  padding: EdgeInsets.all(width * 0.03),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).secondaryHeaderColor,
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: width * 0.06,
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.school, color: Theme.of(context).secondaryHeaderColor, size: width * 0.06),
-                          ),
-                          SizedBox(width: width * 0.03),
-                          Expanded(
-                            child: Text(
-                              '${systemProvider.selectedEtablissement?.ETBNOM}',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: width * 0.05),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    width: width,
+                    height: height * 0.2,
+                    padding: EdgeInsets.all(width * 0.03),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).secondaryHeaderColor,
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: width * 0.06,
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.school, color: Theme.of(context).secondaryHeaderColor, size: width * 0.06),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: height * 0.02),
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_today, color: Colors.white70, size: width * 0.045),
-                          SizedBox(width: width * 0.02),
-                          Text(
-                            'السنة الدراسية: ${authProvider.selectedYear!.ANEDEB.round()} - ${authProvider.selectedYear!.ANEFIN.round()}',
-                            style: TextStyle(color: Colors.white70, fontSize: width * 0.04),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: height * 0.01),
-                      Row(
-                        children: [
-                          Icon(Icons.person, color: Colors.white70, size: width * 0.045),
-                          SizedBox(width: width * 0.02),
-                          Text(
-                            'الأستاذ: ${authProvider.selectedUser?.USRPRENOM} ${authProvider.selectedUser?.USRNOM}',
-                            style: TextStyle(color: Colors.white70, fontSize: width * 0.04),
-                          ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(width: width * 0.03),
+                            Expanded(
+                              child: Text(
+                                '${systemProvider.selectedEtablissement?.ETBNOM}',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: width * 0.05),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: height * 0.02),
+                        Row(
+                          children: [
+                            Icon(Icons.calendar_today, color: Colors.white70, size: width * 0.045),
+                            SizedBox(width: width * 0.02),
+                            Text(
+                              'السنة الدراسية: ${authProvider.selectedYear!.ANEDEB.round()} - ${authProvider.selectedYear!.ANEFIN.round()}',
+                              style: TextStyle(color: Colors.white70, fontSize: width * 0.04),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: height * 0.01),
+                        Row(
+                          children: [
+                            Icon(Icons.person, color: Colors.white70, size: width * 0.045),
+                            SizedBox(width: width * 0.02),
+                            Text(
+                              'الأستاذ: ${authProvider.selectedUser?.USRPRENOM} ${authProvider.selectedUser?.USRNOM}',
+                              style: TextStyle(color: Colors.white70, fontSize: width * 0.04),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 Expanded(
+                  flex: 4,
                   child: Container(
                     alignment: Alignment.center,
                     padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: width * 0.06),
