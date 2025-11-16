@@ -80,8 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
     String? ip = prefs.getString('ip_address');
     String? port = prefs.getString('port');
     if (ip == null || port == null) {
-      ip = '192.168.1.65';
-      port = '8080';
+      ip = '192.168.1.75';
+      port = '8181';
       prefs.setString('ip_address', ip);
       prefs.setString('port', port);
     }

@@ -12,6 +12,7 @@ import '../models/class.dart';
 import '../models/module.dart';
 import '../models/note.dart';
 import '../models/period.dart';
+import 'package:intl/intl.dart';
 
 class NoteViewModel extends ChangeNotifier {
   AuthViewModel? authViewModel;
@@ -221,6 +222,10 @@ class NoteViewModel extends ChangeNotifier {
           'evaluation': selectedEvaluation?.EVANO,
         }),
       );
+      print("url sent: http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Student_Without_Evaluation");
+      print(
+        "ata sent: ${jsonEncode({'path': authViewModel!.selectedFolder?.DOSBDD, 'cycle': selectedClass?.CLSCYC, 'level': selectedClass?.CLSNIV, 'class': selectedClass?.CLSNO, 'speciality': selectedClass?.CLSSPC, 'year': authViewModel!.selectedYear?.ANENO, 'period': selectedPeriod?.PERNO, 'module': selectedModule?.MATNO, 'evaluation': selectedEvaluation?.EVANO})}",
+      );
       print('Get_Student_Without_Evaluation: ${response.statusCode}');
       print('Get_Student_Without_Evaluation: ${response.body}');
       studentEvaluationStatusCode = response.statusCode;
@@ -248,7 +253,10 @@ class NoteViewModel extends ChangeNotifier {
                 SEMOBSERV: '',
               ),
             );
+            print('--: ${student.elvnom} ${student.elvprenom}');
           }
+          
+
           print('notes after adding new: ${notes?.length}');
         }
       }

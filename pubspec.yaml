@@ -38,7 +38,7 @@ dependencies:
   http: 
   arabic_font: 
   toastification: 
-  intl: 
+  intl: ^0.20.2
   expandable: 
   shared_preferences: 
   crypto: 

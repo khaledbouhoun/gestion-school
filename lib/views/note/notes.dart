@@ -471,11 +471,23 @@ class _NotesSliverList extends StatelessWidget {
             selector: (_, vm) => vm.notes?.length ?? 0,
             builder: (context, notesLength, _) {
               final notes = noteProvider.notes;
+              String normalizeArabic(String text) {
+                return text
+                    .replaceAll(RegExp(r'[أآإ]'), 'ا')
+                    .replaceAll('ى', 'ي')
+                    .replaceAll('ؤ', 'و')
+                    .replaceAll('ئ', 'ي')
+                    .replaceAll('ة', 'ه')
+                    .replaceAll(RegExp(r'ّ'), ''); // remove shadda
+              }
+
+              notes!.sort((a, b) => normalizeArabic(a.ELVNOM).compareTo(normalizeArabic(b.ELVNOM)));
+
               return SliverPadding(
                 padding: EdgeInsets.only(bottom: width * 0.02, right: width * 0.02, left: width * 0.02),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    final note = notes![index];
+                    final note = notes[index];
                     return NoteWidget(key: ValueKey(note.NOTELV), note: note);
                   }, childCount: notesLength),
                 ),

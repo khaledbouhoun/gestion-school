@@ -141,7 +141,7 @@ class _NoteTextFieldState extends State<_NoteTextField> {
         hintStyle: TextStyle(fontSize: 18, color: Colors.grey[400], fontWeight: FontWeight.bold),
         errorText: (widget.note.NOTVALEUR != null && widget.note.NOTVALEUR! > maxValue) ? 'أكبر من الحد المسموح ($maxValue)' : null,
       ),
-      style: TextStyle(color: borderColor, fontWeight: FontWeight.w800, fontSize: 18),
+      style: TextStyle(color: borderColor, fontWeight: FontWeight.w800, fontSize: 22, fontFamily: 'arial'),
       onChanged: (val) {
         print('note valeur : ${widget.note.NOTVALEUR ?? 'null'}');
         double? parsedVal = double.tryParse(val);
