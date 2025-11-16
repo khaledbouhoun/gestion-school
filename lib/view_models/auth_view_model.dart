@@ -137,13 +137,13 @@ class AuthViewModel extends ChangeNotifier {
       http.Response response = await http.post(
         Uri.parse('http://$ip_address:$port/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}'),
       );
-
+      print("url: http://$ip_address:$port/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}");
       print(response.body);
       print(response.statusCode);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         accessList = Access.listFromJson(data['access']);
-      } 
+      }
       loginStatusCode = response.statusCode;
       notifyListeners();
     } catch (err) {

@@ -37,7 +37,7 @@ class LoadDataPage extends State<LoadData> {
       textDirection: TextDirection.rtl,
       child: WillPopScope(
         onWillPop: () async {
-          return false;
+          return true;
         },
         child: Scaffold(
           body: Container(

@@ -34,51 +34,59 @@ class Home extends StatelessWidget {
             automaticallyImplyLeading: false,
             backgroundColor: Theme.of(context).secondaryHeaderColor,
             elevation: 0,
-            title: Text(
-              'متابعة التلاميذ',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: width * 0.05),
+
+            leading: PopupMenuButton(
+              icon: Icon(Icons.settings, color: Colors.white, size: width * 0.07),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 0,
+                  child: Row(
+                    children: [
+                      Icon(Icons.lock, color: Theme.of(context).secondaryHeaderColor),
+                      SizedBox(width: 8),
+                      Text('تغيير كلمة المرور', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 1,
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text(
+                        'تسجيل الخروج',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              onSelected: (value) {
+                switch (value) {
+                  case 0:
+                    authProvider.currentPasswordHiding = true;
+                    authProvider.newPasswordHiding = true;
+                    authProvider.conformPasswordHiding = true;
+                    Navigator.push(context, MaterialPageRoute(builder: (builder) => ChangePassword()));
+                  case 1:
+                    LogOutDialog.showLogOutDialog(context);
+                }
+              },
             ),
+
             actions: [
-              PopupMenuButton(
-                icon: Icon(Icons.settings, color: Colors.white, size: width * 0.07),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 0,
-                    child: Row(
-                      children: [
-                        Icon(Icons.lock, color: Theme.of(context).secondaryHeaderColor),
-                        SizedBox(width: 8),
-                        Text('تغيير كلمة المرور', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 1,
-                    child: Row(
-                      children: [
-                        Icon(Icons.logout, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text(
-                          'تسجيل الخروج',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                onSelected: (value) {
-                  switch (value) {
-                    case 0:
-                      authProvider.currentPasswordHiding = true;
-                      authProvider.newPasswordHiding = true;
-                      authProvider.conformPasswordHiding = true;
-                      Navigator.push(context, MaterialPageRoute(builder: (builder) => ChangePassword()));
-                    case 1:
-                      LogOutDialog.showLogOutDialog(context);
-                  }
-                },
+              Text(
+                '${systemProvider.selectedEtablissement?.ETBNOM}',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: width * 0.05),
               ),
-              SizedBox(width: 8),
+              SizedBox(width: width * 0.02),
+
+              CircleAvatar(
+                radius: width * 0.06,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.school, color: Theme.of(context).secondaryHeaderColor, size: width * 0.06),
+              ),
             ],
           ),
           body: Directionality(
@@ -89,51 +97,31 @@ class Home extends StatelessWidget {
                   flex: 1,
                   child: Container(
                     width: width,
-                    height: height * 0.2,
+                    height: height * 0.1,
                     padding: EdgeInsets.all(width * 0.03),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).secondaryHeaderColor,
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
-                    ),
+                    decoration: BoxDecoration(color: Theme.of(context).secondaryHeaderColor),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: width * 0.06,
-                              backgroundColor: Colors.white,
-                              child: Icon(Icons.school, color: Theme.of(context).secondaryHeaderColor, size: width * 0.06),
-                            ),
-                            SizedBox(width: width * 0.03),
-                            Expanded(
-                              child: Text(
-                                '${systemProvider.selectedEtablissement?.ETBNOM}',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: width * 0.05),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: height * 0.02),
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_today, color: Colors.white70, size: width * 0.045),
+                            Icon(Icons.calendar_today, color: Colors.white, size: width * 0.045),
                             SizedBox(width: width * 0.02),
                             Text(
                               'السنة الدراسية: ${authProvider.selectedYear!.ANEDEB.round()} - ${authProvider.selectedYear!.ANEFIN.round()}',
-                              style: TextStyle(color: Colors.white70, fontSize: width * 0.04),
+                              style: TextStyle(color: Colors.white, fontSize: width * 0.04),
                             ),
                           ],
                         ),
                         SizedBox(height: height * 0.01),
                         Row(
                           children: [
-                            Icon(Icons.person, color: Colors.white70, size: width * 0.045),
+                            Icon(Icons.person, color: Colors.white, size: width * 0.045),
                             SizedBox(width: width * 0.02),
                             Text(
                               'الأستاذ: ${authProvider.selectedUser?.USRPRENOM} ${authProvider.selectedUser?.USRNOM}',
-                              style: TextStyle(color: Colors.white70, fontSize: width * 0.04),
+                              style: TextStyle(color: Colors.white, fontSize: width * 0.04),
                             ),
                           ],
                         ),
@@ -142,7 +130,7 @@ class Home extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  flex: 4,
+                  flex: 7,
                   child: Container(
                     alignment: Alignment.center,
                     padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: width * 0.06),
@@ -154,17 +142,6 @@ class Home extends StatelessWidget {
                       physics: const AlwaysScrollableScrollPhysics(),
                       child: Column(
                         children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(vertical: height * 0.02),
-                            child: Text(
-                              'خدمات المدرسة',
-                              style: TextStyle(
-                                fontSize: width * 0.06,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).secondaryHeaderColor,
-                              ),
-                            ),
-                          ),
                           GridView.count(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),

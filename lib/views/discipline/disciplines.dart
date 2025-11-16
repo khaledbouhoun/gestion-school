@@ -35,6 +35,13 @@ class DisciplinesPage extends State<Disciplines> {
       textDirection: TextDirection.rtl,
       child: Consumer2<DisciplineViewModel, SystemViewModel>(
         builder: (context, disciplineProvider, systemProvider, child) {
+          // Ensure the discipline provider has a selectedPeriod that matches
+          // one of the system provider's periods. If not initialized, default
+          // to the system selected period (which is an item from the periods list)
+          // so the DropdownButton's value matches exactly one DropdownMenuItem.
+          if (disciplineProvider.selectedPeriod == null && systemProvider.selectedPeriod != null) {
+            disciplineProvider.selectedPeriod = systemProvider.selectedPeriod;
+          }
           return WillPopScope(
             onWillPop: () async {
               Navigator.push(context, MaterialPageRoute(builder: (builder) => const Home()));
