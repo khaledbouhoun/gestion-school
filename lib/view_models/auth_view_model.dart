@@ -7,10 +7,16 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/access.dart';
 import '../models/user.dart';
+import '../devicehelper.dart';
 
 class AuthViewModel extends ChangeNotifier {
   String ip_address = '192.168.1.65';
   String port = '5050';
+
+  String get licenseUrl => 'http://192.168.1.65:8000/api';
+
+  DeviceInfo? deviceInfo;
+
   bool hide = true;
 
   User? selectedUser;
@@ -34,6 +40,10 @@ class AuthViewModel extends ChangeNotifier {
   bool conformPasswordHiding = true;
   int? changePasswordStatusCode;
 
+  Future<void> getDeviceInfo() async {
+    deviceInfo = await DeviceHelper.getDeviceInfo();
+  }
+
   Future<void> getUsersAndFolders() async {
     final url = Uri.parse('http://$ip_address:$port/getuserandfolder');
     print("Fetching users and folders from: $url");
@@ -49,7 +59,9 @@ class AuthViewModel extends ChangeNotifier {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
         users = data['users'] != null ? User.listFromJson(data['users']) : [];
-        folders = data['folders'] != null ? Folder.listFromJson(data['folders']) : [];
+        folders = data['folders'] != null
+            ? Folder.listFromJson(data['folders'])
+            : [];
 
         await _restoreOrSetDefaultUser();
         _selectDefaultFolder();
@@ -82,7 +94,10 @@ class AuthViewModel extends ChangeNotifier {
     }
 
     if (savedUserNo != null) {
-      selectedUser = users!.firstWhere((u) => u.USRNO == savedUserNo, orElse: () => users!.first);
+      selectedUser = users!.firstWhere(
+        (u) => u.USRNO == savedUserNo,
+        orElse: () => users!.first,
+      );
     } else {
       selectedUser = users!.first;
     }
@@ -135,9 +150,13 @@ class AuthViewModel extends ChangeNotifier {
       loginStatusCode = 0;
       notifyListeners();
       http.Response response = await http.post(
-        Uri.parse('http://$ip_address:$port/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}'),
+        Uri.parse(
+          'http://$ip_address:$port/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}',
+        ),
       );
-      print("url: http://$ip_address:$port/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}");
+      print(
+        "url: http://$ip_address:$port/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}",
+      );
       print(response.body);
       print(response.statusCode);
       if (response.statusCode == 200) {
@@ -156,11 +175,17 @@ class AuthViewModel extends ChangeNotifier {
   Future getRubriques() async {
     try {
       statusCode = 0;
-      print('http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}');
-      http.Response response = await http.post(
-        Uri.parse('http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}'),
+      print(
+        'http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}',
       );
-      print("url: http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}");
+      http.Response response = await http.post(
+        Uri.parse(
+          'http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}',
+        ),
+      );
+      print(
+        "url: http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}",
+      );
       print(response.body);
       print(response.statusCode);
       if (response.statusCode == 200) {
@@ -180,8 +205,14 @@ class AuthViewModel extends ChangeNotifier {
     try {
       changePasswordStatusCode = 0;
       notifyListeners();
-      Map<String, dynamic> body = {'password': newPassword, 'user': selectedUser!.USRNO};
-      http.Response response = await http.post(Uri.parse('http://$ip_address:$port/change_password'), body: body);
+      Map<String, dynamic> body = {
+        'password': newPassword,
+        'user': selectedUser!.USRNO,
+      };
+      http.Response response = await http.post(
+        Uri.parse('http://$ip_address:$port/change_password'),
+        body: body,
+      );
       changePasswordStatusCode = response.statusCode;
       if (response.statusCode == 200) {
         selectedUser!.USRPASSW = newPassword;

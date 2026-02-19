@@ -1,5 +1,8 @@
+import 'package:al_moiin/ask_first.dart';
 import 'package:al_moiin/change_password.dart';
+import 'package:al_moiin/load_users.dart';
 import 'package:al_moiin/view_models/auth_view_model.dart';
+import 'package:al_moiin/view_models/license_view_model.dart';
 import 'package:al_moiin/view_models/system_view_model.dart';
 import 'package:al_moiin/views/absence/absences.dart';
 import 'package:al_moiin/views/discipline/disciplines.dart';
@@ -12,15 +15,49 @@ import 'package:al_moiin/widgets/logout_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this); // إضافة مراقب لحالة التطبيق
+    Provider.of<LicenseViewModel>(
+      context,
+      listen: false,
+    ).checkSecurityOnEntry(context);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(
+      this,
+    ); // حذف المراقب عند إغلاق الشاشة
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // إذا عاد المستخدم للتطبيق من الخلفية
+    if (state == AppLifecycleState.resumed) {
+      Provider.of<LicenseViewModel>(
+        context,
+        listen: false,
+      ).checkSecurityOnEntry(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-    var authProvider = Provider.of<AuthViewModel>(context, listen: false);
-    var systemProvider = Provider.of<SystemViewModel>(context, listen: false);
+    final authProvider = Provider.of<AuthViewModel>(context);
+    final systemProvider = Provider.of<SystemViewModel>(context);
     return Directionality(
       textDirection: TextDirection.ltr,
       child: WillPopScope(
@@ -36,15 +73,25 @@ class Home extends StatelessWidget {
             elevation: 0,
 
             leading: PopupMenuButton(
-              icon: Icon(Icons.settings, color: Colors.white, size: width * 0.07),
+              icon: Icon(
+                Icons.settings,
+                color: Colors.white,
+                size: width * 0.07,
+              ),
               itemBuilder: (context) => [
                 PopupMenuItem(
                   value: 0,
                   child: Row(
                     children: [
-                      Icon(Icons.lock, color: Theme.of(context).secondaryHeaderColor),
+                      Icon(
+                        Icons.lock,
+                        color: Theme.of(context).secondaryHeaderColor,
+                      ),
                       SizedBox(width: 8),
-                      Text('تغيير كلمة المرور', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        'تغيير كلمة المرور',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
@@ -56,7 +103,10 @@ class Home extends StatelessWidget {
                       SizedBox(width: 8),
                       Text(
                         'تسجيل الخروج',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
                       ),
                     ],
                   ),
@@ -68,7 +118,10 @@ class Home extends StatelessWidget {
                     authProvider.currentPasswordHiding = true;
                     authProvider.newPasswordHiding = true;
                     authProvider.conformPasswordHiding = true;
-                    Navigator.push(context, MaterialPageRoute(builder: (builder) => ChangePassword()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (builder) => ChangePassword()),
+                    );
                   case 1:
                     LogOutDialog.showLogOutDialog(context);
                 }
@@ -78,14 +131,22 @@ class Home extends StatelessWidget {
             actions: [
               Text(
                 '${systemProvider.selectedEtablissement?.ETBNOM}',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: width * 0.05),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: width * 0.05,
+                ),
               ),
               SizedBox(width: width * 0.02),
 
               CircleAvatar(
                 radius: width * 0.06,
                 backgroundColor: Colors.white,
-                child: Icon(Icons.school, color: Theme.of(context).secondaryHeaderColor, size: width * 0.06),
+                child: Icon(
+                  Icons.school,
+                  color: Theme.of(context).secondaryHeaderColor,
+                  size: width * 0.06,
+                ),
               ),
             ],
           ),
@@ -99,29 +160,45 @@ class Home extends StatelessWidget {
                     width: width,
                     height: height * 0.1,
                     padding: EdgeInsets.all(width * 0.03),
-                    decoration: BoxDecoration(color: Theme.of(context).secondaryHeaderColor),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).secondaryHeaderColor,
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.calendar_today, color: Colors.white, size: width * 0.045),
+                            Icon(
+                              Icons.calendar_today,
+                              color: Colors.white,
+                              size: width * 0.045,
+                            ),
                             SizedBox(width: width * 0.02),
                             Text(
                               'السنة الدراسية: ${authProvider.selectedYear!.ANEDEB.round()} - ${authProvider.selectedYear!.ANEFIN.round()}',
-                              style: TextStyle(color: Colors.white, fontSize: width * 0.04),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: width * 0.04,
+                              ),
                             ),
                           ],
                         ),
                         SizedBox(height: height * 0.01),
                         Row(
                           children: [
-                            Icon(Icons.person, color: Colors.white, size: width * 0.045),
+                            Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: width * 0.045,
+                            ),
                             SizedBox(width: width * 0.02),
                             Text(
                               'الأستاذ: ${authProvider.selectedUser?.USRPRENOM} ${authProvider.selectedUser?.USRNOM}',
-                              style: TextStyle(color: Colors.white, fontSize: width * 0.04),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: width * 0.04,
+                              ),
                             ),
                           ],
                         ),
@@ -133,10 +210,16 @@ class Home extends StatelessWidget {
                   flex: 7,
                   child: Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.symmetric(horizontal: width * 0.05, vertical: width * 0.06),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: width * 0.05,
+                      vertical: width * 0.06,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
-                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(40), topRight: Radius.circular(40)),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(40),
+                        topRight: Radius.circular(40),
+                      ),
                     ),
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -150,12 +233,36 @@ class Home extends StatelessWidget {
                             mainAxisSpacing: width * 0.04,
                             crossAxisSpacing: width * 0.04,
                             children: [
-                              HomeButton(title: 'التلاميذ', direction: const Students(), imagePath: 'assets/icons/students.png'),
-                              HomeButton(title: 'ملف الأستاذ', direction: const Profile(), imagePath: 'assets/icons/profile.png'),
-                              HomeButton(title: 'الغيابات', direction: const Absences(), imagePath: 'assets/icons/absences.png'),
-                              HomeButton(title: 'السلوكات', direction: const Disciplines(), imagePath: 'assets/icons/discipline.png'),
-                              HomeButton(title: 'التحصيل القرآني', direction: const Tranches(), imagePath: 'assets/icons/quran.png'),
-                              HomeButton(title: 'العلامات', direction: const Notes(), imagePath: 'assets/icons/notes.png'),
+                              HomeButton(
+                                title: 'التلاميذ',
+                                direction: const Students(),
+                                imagePath: 'assets/icons/students.png',
+                              ),
+                              HomeButton(
+                                title: 'ملف الأستاذ',
+                                direction: const Profile(),
+                                imagePath: 'assets/icons/profile.png',
+                              ),
+                              HomeButton(
+                                title: 'الغيابات',
+                                direction: const Absences(),
+                                imagePath: 'assets/icons/absences.png',
+                              ),
+                              HomeButton(
+                                title: 'السلوكات',
+                                direction: const Disciplines(),
+                                imagePath: 'assets/icons/discipline.png',
+                              ),
+                              HomeButton(
+                                title: 'التحصيل القرآني',
+                                direction: const Tranches(),
+                                imagePath: 'assets/icons/quran.png',
+                              ),
+                              HomeButton(
+                                title: 'العلامات',
+                                direction: const Notes(),
+                                imagePath: 'assets/icons/notes.png',
+                              ),
                             ],
                           ),
                         ],

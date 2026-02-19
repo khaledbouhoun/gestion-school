@@ -29,7 +29,7 @@ class Profile extends StatelessWidget{
               automaticallyImplyLeading: false,
               backgroundColor: Theme.of(context).secondaryHeaderColor,
               title: Center(
-                child: Text('الملف الشخصي', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: width * 0.06),),
+                child: Text('ملف الأستاذ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: width * 0.06),),
               ),
             ),
             body: Container(

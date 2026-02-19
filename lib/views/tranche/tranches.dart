@@ -54,7 +54,7 @@ class TranchesPage extends State<Tranches> with Quran {
                   automaticallyImplyLeading: false,
                   title: Center(
                     child: Text(
-                      'القسط القرآني',
+                      'التحصيل القرآني',
                       style: TextStyle(color: Colors.white, fontSize: width * 0.07, fontWeight: FontWeight.bold),
                     ),
                   ),

@@ -41,9 +41,13 @@ dependencies:
   intl: ^0.20.2
   expandable: 
   shared_preferences: 
-  crypto: 
+  crypto: ^3.0.7 
   flutter_launcher_icons: ^0.14.4 
   flutter_native_splash: 
+  device_info_plus: ^12.3.0
+  uuid: ^4.5.2
+  android_id: ^0.4.0
+  flutter_secure_storage: ^10.0.0
 
 dev_dependencies:
   flutter_test:

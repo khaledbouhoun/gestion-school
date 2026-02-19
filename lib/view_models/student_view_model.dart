@@ -20,7 +20,9 @@ class StudentViewModel extends ChangeNotifier {
       filtredStudent = [];
       statusCode = 0;
       http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Student'),
+        Uri.parse(
+          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Student',
+        ),
         body: jsonEncode({
           'path': authViewModel?.selectedFolder?.DOSBDD,
           'year': authViewModel?.selectedYear?.ANENO,
