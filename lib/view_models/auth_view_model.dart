@@ -13,7 +13,7 @@ class AuthViewModel extends ChangeNotifier {
   String ip_address = '192.168.1.65';
   String port = '5050';
 
-  String get licenseUrl => 'http://192.168.1.65:8000/api';
+  String get licenseUrl => 'https://licenseactivation.softel.dz/api';
 
   DeviceInfo? deviceInfo;
 

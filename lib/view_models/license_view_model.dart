@@ -53,11 +53,6 @@ class LicenseViewModel extends ChangeNotifier {
     _isActivated = prefs.getBool('is_activated') ?? false;
     _licenseKey = await SecureStorageService.getUserKey();
 
-    // fake date for test
-    prefs.setString(
-      'last_sync_date',
-      DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
-    );
     String? lastCheckStr = prefs.getString('last_sync_date');
 
     if (!_isActivated || _licenseKey == null) {

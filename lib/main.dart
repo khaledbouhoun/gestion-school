@@ -20,8 +20,8 @@ import 'ask_first.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AuthViewModel authViewModel = AuthViewModel();
-  LicenseViewModel licenseViewModel = LicenseViewModel(authViewModel);
   SystemViewModel systemViewModel = SystemViewModel(authViewModel);
+  LicenseViewModel licenseViewModel = LicenseViewModel(authViewModel);
   await authViewModel.getDeviceInfo();
 
   runApp(
