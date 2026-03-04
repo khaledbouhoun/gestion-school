@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:al_moiin/flutter_scure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:al_moiin/main.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,24 +21,23 @@ class LicenseViewModel extends ChangeNotifier {
 
   String? _licenseKey;
   bool _isLoading = false;
+  bool _isLoadingDelete = false;
   String? _errorMessage;
   bool _isActivated = false;
   bool _isDialogOpen = false; // لمنع تكرار فتح الـ Dialog
 
   String? get licenseKey => _licenseKey;
   bool get isLoading => _isLoading;
+  bool get isLoadingDelete => _isLoadingDelete;
   String? get errorMessage => _errorMessage;
   bool get isActivated => _isActivated;
 
   CheckResult checkResult = CheckResult.success;
 
-  // 1. فحص اتصال الإنترنت العام
   Future<CheckResult> checkInternet() async {
     try {
-      final response = await http
-          .get(Uri.parse('https://www.google.com'))
-          .timeout(const Duration(seconds: 5)); // إضافة مهلة
-      if (response.statusCode == 200) {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         return CheckResult.success;
       }
       return CheckResult.noInternet;
@@ -46,7 +46,6 @@ class LicenseViewModel extends ChangeNotifier {
     }
   }
 
-  // 2. فحص حالة التفعيل (الأساسية)
   Future<CheckResult> checkActivationStatus() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -59,25 +58,24 @@ class LicenseViewModel extends ChangeNotifier {
       return CheckResult.invalidLicense;
     }
 
-    // التحقق من مرور 24 ساعة
-    if (lastCheckStr != null) {
-      DateTime lastCheck = DateTime.parse(lastCheckStr);
-      DateTime localDateTime = lastCheck.toLocal(); // التوقيت المحلي (الجزائر)
-      DateTime now = DateTime.now();
+    if (lastCheckStr == null) {
+      debugPrint("No local sync date found. Initializing first check.");
+      return await performOnlineCheck(_licenseKey!);
+    }
 
-      if (now.difference(localDateTime).inHours >= 24) {
-        debugPrint("More than 24h passed. Needs online check.");
-        return await performOnlineCheck(_licenseKey!);
-      }
+    final lastCheckDate = formatApiDate(lastCheckStr);
+    final isExpired = DateTime.now().difference(lastCheckDate).inHours >= 24;
+
+    if (isExpired) {
+      debugPrint("License cache expired. Syncing with server...");
+      return await performOnlineCheck(_licenseKey!);
     }
 
     return CheckResult.success;
   }
 
-  // 3. التحقق عبر الإنترنت من السيرفر (Laravel)
   Future<CheckResult> performOnlineCheck(String key) async {
     try {
-      // نتأكد من الإنترنت أولاً
       checkResult = await checkInternet();
       if (checkResult != CheckResult.success) return checkResult;
 
@@ -96,19 +94,18 @@ class LicenseViewModel extends ChangeNotifier {
         final data = jsonDecode(response.body);
         final prefs = await SharedPreferences.getInstance();
 
-        // تحديث تاريخ المزامنة القادم من السيرفر
-        await prefs.setString(
-          'last_sync_date',
-          data['license']['last_sync_date'],
-        );
+        if (data['license'] != null &&
+            data['license']['last_sync_date'] != null) {
+          DateTime localDate = formatApiDate(data['license']['last_sync_date']);
+
+          await prefs.setString('last_sync_date', localDate.toIso8601String());
+        }
         return CheckResult.success;
       } else if (response.statusCode >= 500) {
         return CheckResult.serverError;
       } else {
-        return CheckResult.invalidLicense; // 401 أو 403
+        return CheckResult.invalidLicense;
       }
-    } on SocketException {
-      return CheckResult.serverError;
     } on TimeoutException {
       return CheckResult.serverError;
     } catch (e) {
@@ -117,7 +114,6 @@ class LicenseViewModel extends ChangeNotifier {
     }
   }
 
-  // 4. التحقق من صيغة المفتاح (محلية)
   bool isLicenseKeyValid(String key) {
     if (key.isEmpty) return false;
     String cleanedKey = key.replaceAll('-', '');
@@ -126,10 +122,9 @@ class LicenseViewModel extends ChangeNotifier {
     return regex.hasMatch(key);
   }
 
-  // 5. تفعيل الترخيص لأول مرة
   Future<bool> activateLicense(String key) async {
     if (!isLicenseKeyValid(key)) {
-      _errorMessage = 'يرجى إدخال مفتاح ترخيص صالح.';
+      _errorMessage = 'Veuillez entrer une clé de licence valide.';
       notifyListeners();
       return false;
     }
@@ -141,7 +136,7 @@ class LicenseViewModel extends ChangeNotifier {
     try {
       checkResult = await checkInternet();
       if (checkResult != CheckResult.success) {
-        _errorMessage = 'لا يوجد اتصال بالإنترنت.';
+        _errorMessage = 'Pas de connexion Internet.';
         _isLoading = false;
         notifyListeners();
         return false;
@@ -156,6 +151,7 @@ class LicenseViewModel extends ChangeNotifier {
               'license_key': key,
               'device_id': authViewModel.deviceInfo?.deviceId,
               'device_model': authViewModel.deviceInfo?.deviceName,
+              'app_id': 2,
             }),
           )
           .timeout(const Duration(seconds: 10));
@@ -175,10 +171,19 @@ class LicenseViewModel extends ChangeNotifier {
             // تحقق من وجود 'license' قبل القراءة لتجنب أخطاء Null
             if (data['license'] != null &&
                 data['license']['last_sync_date'] != null) {
-              await prefs.setString(
-                'last_sync_date',
+              DateTime localDate = formatApiDate(
                 data['license']['last_sync_date'],
               );
+
+              await prefs.setString(
+                'last_sync_date',
+                localDate.toIso8601String(),
+              );
+            }
+
+            if (data['subscription'] != null &&
+                data['subscription']['id'] != null) {
+              await prefs.setInt('subscription_id', data['subscription']['id']);
             }
 
             _isLoading = false;
@@ -187,27 +192,33 @@ class LicenseViewModel extends ChangeNotifier {
           }
           break;
         case 401:
-          _errorMessage = 'مفتاح الترخيص هذا غير صالح';
+          _errorMessage = 'Cette clé de licence est invalide.';
           break;
         case 403:
           _errorMessage =
-              data['error'] ?? 'هذا الترخيص منتهي أو غير متاح حالياً.';
+              data['error'] ??
+              'Cette licence est expirée ou actuellement indisponible.';
           break;
         case 422:
-          _errorMessage = 'البيانات المرسلة غير صالحة. تأكد من إعدادات الجهاز.';
+          _errorMessage =
+              'Les données envoyées sont invalides. Vérifiez les paramètres de l\'appareil.';
           break;
         case 500:
-          _errorMessage = 'خطأ داخلي في الخادم. يرجى مراسلة الدعم الفني.';
+          _errorMessage =
+              'Erreur interne du serveur. Veuillez contacter le support technique.';
           break;
         default:
-          _errorMessage = 'حدث خطأ غير متوقع (${response.statusCode}).';
+          _errorMessage =
+              'Une erreur inattendue s\'est produite (${response.statusCode}).';
       }
     } on SocketException {
-      _errorMessage = 'لا يمكن الوصول للسيرفر. تأكد من الـ IP والـ Firewall.';
+      _errorMessage =
+          'Impossible d\'accéder au serveur. Vérifiez l\'IP et le Firewall.';
     } on TimeoutException {
-      _errorMessage = 'انتهت مهلة الاتصال. السيرفر بطيء جداً.';
+      _errorMessage = 'Délai de connexion dépassé. Le serveur est trop lent.';
     } catch (e) {
-      _errorMessage = 'حدث خطأ غير معروف: $e';
+      _errorMessage = 'Une erreur inconnue s\'est produite : $e';
+      return false;
     }
 
     _isLoading = false;
@@ -215,15 +226,49 @@ class LicenseViewModel extends ChangeNotifier {
     return false;
   }
 
-  // 6. التحقق الأمني عند دخول الشاشة
+  // delete licence
+  Future<bool> deleteLicense() async {
+    _isLoadingDelete = true;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final response = await http.delete(
+        Uri.parse('${authViewModel.licenseUrl}/deactivate'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'subscription_id': prefs.getInt('subscription_id'),
+          'device_id': authViewModel.deviceInfo?.deviceId,
+        }),
+      );
+      if (response.statusCode == 200) {
+        _isLoadingDelete = false;
+        _isActivated = false;
+        _licenseKey = null;
+        await prefs.remove('is_activated');
+        await prefs.remove('license_key');
+        await prefs.remove('subscription_id');
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Error deleting license: $e');
+    }
+    _isLoadingDelete = false;
+    notifyListeners();
+    return false;
+  }
+
   void checkSecurityOnEntry(BuildContext context) async {
+    print("/////////////////");
     CheckResult status = await checkActivationStatus();
     if (status != CheckResult.success) {
       showSessionExpiredDialog(context, initialError: status);
     }
   }
 
-  // 7. عرض الـ Dialog الاحترافي
   void showSessionExpiredDialog(
     BuildContext context, {
     CheckResult? initialError,
@@ -232,135 +277,151 @@ class LicenseViewModel extends ChangeNotifier {
 
     _isDialogOpen = true;
 
-    // تحديد الرسالة المبدئية بناءً على نوع الخطأ
+    bool isloading = false;
+
     String dialogMessage = '';
     if (initialError == CheckResult.noInternet) {
-      dialogMessage = 'لا يوجد اتصال بالإنترنت. تأكد من إعدادات الشبكة.';
-    }
-    if (initialError == CheckResult.serverError) {
-      dialogMessage = 'لا يمكن الوصول للسيرفر. يرجى المحاولة لاحقاً.';
+      dialogMessage =
+          'Pas de connexion Internet. Vérifiez vos paramètres réseau.';
     }
     if (initialError == CheckResult.invalidLicense) {
-      dialogMessage = 'الترخيص الخاص بك غير صالح أو منتهي.';
+      dialogMessage = 'Votre licence est invalide ou expirée.';
     }
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            // تحديد الأيقونة واللون بناءً على نوع الخطأ
-            bool isServerError = initialError == CheckResult.serverError;
-            IconData headerIcon = isServerError
-                ? Icons.dns_rounded
-                : Icons.security_rounded;
-            Color themeColor = isServerError
-                ? Colors.orange.shade700
-                : Colors.red.shade700;
+        return PopScope(
+          canPop: false,
+          child: StatefulBuilder(
+            builder: (context, setDialogState) {
+              bool isnoInternetErorr = initialError == CheckResult.noInternet;
+              IconData headerIcon = isnoInternetErorr
+                  ? Icons.wifi_off_rounded
+                  : Icons.security_rounded;
+              Color themeColor = isnoInternetErorr
+                  ? Colors.red.shade700
+                  : Colors.blue.shade700;
 
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              titlePadding: EdgeInsets.zero,
-              title: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: themeColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: Column(
-                  children: [
-                    Icon(headerIcon, color: Colors.white, size: 40),
-                    const SizedBox(height: 10),
-                    Text(
-                      isServerError ? 'خطأ في الاتصال' : 'تنبيه أمني',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                titlePadding: EdgeInsets.zero,
+                title: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: themeColor,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
                     ),
-                  ],
-                ),
-              ),
-              content: Padding(
-                padding: const EdgeInsets.only(top: 15),
-                child: Text(
-                  dialogMessage,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, height: 1.5),
-                ),
-              ),
-              actionsAlignment: MainAxisAlignment.center,
-              actions: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 10,
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('حاول مرة أخرى'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: themeColor,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                      Icon(headerIcon, color: Colors.white, size: 40),
+                      const SizedBox(height: 10),
+                      Text(
+                        isnoInternetErorr
+                            ? 'Erreur de connexion'
+                            : 'Alerte de sécurité',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
-                        onPressed: () async {
-                          // منطق التحقق الخاص بك هنا...
-                          CheckResult result = await checkActivationStatus();
-                          if (result == CheckResult.success) {
-                            Navigator.of(context).pop();
-                          } else {
-                            setDialogState(() {
-                              // if (result == CheckResult.noInternet) {
-                              //   dialogMessage =
-                              //       'لا يوجد اتصال بالإنترنت. تأكد من الـ Wifi.';
-                              // } else if (result == CheckResult.serverError) {
-                              //   dialogMessage =
-                              //       'السيرفر لا يستجيب، تحقق من الخادم.';
-                              // } else {
-                              //   dialogMessage = 'الرخصة منتهية، يرجى التجديد.';
-                              // }
-                            });
-                          }
-                        },
-                      ),
-                      TextButton(
-                        child: const Text(
-                          'خروج من التطبيق',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        onPressed: () async {
-                          // مسح البيانات الأمنية عند الخروج الإجباري
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.remove('last_sync_date');
-
-                          if (context.mounted) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (builder) => const AskFirst(),
-                              ),
-                              (route) => false,
-                            );
-                          }
-                        },
                       ),
                     ],
                   ),
                 ),
-              ],
-            );
-          },
+                content: Padding(
+                  padding: const EdgeInsets.only(top: 15),
+                  child: Text(
+                    dialogMessage,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16, height: 1.5),
+                  ),
+                ),
+                actionsAlignment: MainAxisAlignment.center,
+                actions: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 10,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.refresh),
+                          label: isloading
+                              ? Padding(
+                                  padding: EdgeInsetsGeometry.all(10),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text('Réessayer'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isloading
+                                ? Colors.grey
+                                : themeColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () async {
+                            if (!isloading) {
+                              setDialogState(() => isloading = true);
+
+                              try {
+                                print("object");
+                                final result = await checkActivationStatus();
+
+                                if (result == CheckResult.success) {
+                                  setDialogState(() => isloading = false);
+                                  Navigator.of(context).pop();
+                                }
+                              } finally {
+                                setDialogState(() => isloading = false);
+                              }
+                            } else {
+                              return;
+                            }
+                          },
+                        ),
+                        TextButton(
+                          child: Text(
+                            initialError == CheckResult.invalidLicense
+                                ? 'Reinitialiser l\'activation'
+                                : 'Reinitialiser les données',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.remove('last_sync_date');
+
+                            if (context.mounted) {
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (builder) =>
+                                      initialError == CheckResult.invalidLicense
+                                      ? const MyHomePage()
+                                      : const AskFirst(),
+                                ),
+                                (route) => false,
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         );
       },
     ).then((_) => _isDialogOpen = false);
@@ -369,5 +430,10 @@ class LicenseViewModel extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  DateTime formatApiDate(String apiDate) {
+    DateTime utcTime = DateTime.parse(apiDate);
+    return utcTime.toLocal();
   }
 }

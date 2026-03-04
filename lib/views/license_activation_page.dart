@@ -17,6 +17,8 @@ class _LicenseActivationPageState extends State<LicenseActivationPage>
   final TextEditingController _controller = TextEditingController();
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
+  String _previousText = '';
+
   bool _isSuccess = false;
 
   @override
@@ -196,6 +198,28 @@ class _LicenseActivationPageState extends State<LicenseActivationPage>
         TextField(
           controller: _controller,
           enabled: !viewModel.isLoading,
+          onChanged: (value) {
+            final isDeleting = value.length < _previousText.length;
+
+            // save current value for next change
+            _previousText = value;
+
+            // allow delete normally
+            if (isDeleting) return;
+
+            const breaks = [4, 9, 14];
+
+            if (breaks.contains(value.length)) {
+              final newText = '$value-';
+
+              _controller.value = TextEditingValue(
+                text: newText,
+                selection: TextSelection.collapsed(offset: newText.length),
+              );
+
+              _previousText = newText;
+            }
+          },
           decoration: InputDecoration(
             hintText: 'XXXX-XXXX-XXXX-XXXX',
             filled: true,
