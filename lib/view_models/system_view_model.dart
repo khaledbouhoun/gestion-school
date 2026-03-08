@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:al_moiin/login.dart';
 import 'package:al_moiin/models/Etablissement.dart';
 import 'package:al_moiin/view_models/auth_view_model.dart';
 import 'package:flutter/material.dart';
@@ -79,15 +80,55 @@ class SystemViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> getClasses() async {
+  Future<void> getClasses(BuildContext context) async {
     try {
       List<Map<String, dynamic>> selectedClasses = [];
+
       authViewModel?.rubriques?.forEach((element) {
         if (element.USBTRB == '01' &&
             element.USBANE == authViewModel!.selectedYear!.ANENO) {
           selectedClasses.add(element.toJson());
         }
       });
+
+      if (selectedClasses.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            backgroundColor: Colors.orange.shade700,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            duration: const Duration(seconds: 2),
+            content: Row(
+              children: const [
+                Icon(Icons.warning_amber_rounded, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "يرجى ملئ المصادر لهذا الأستاذ",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (builder) => Login()),
+            (route) => false,
+          );
+        });
+
+        return;
+      }
 
       Map<String, String> headers = {
         'Content-type': 'application/json',
@@ -110,6 +151,9 @@ class SystemViewModel extends ChangeNotifier {
         dynamic data = jsonDecode(response.body);
         classes = Class.listFromJson(data['classes']);
         selectedClass = classes?.first;
+      } else if (classStatusCode == 404) {
+        classes = [];
+        classStatusCode = 404;
       } else {
         classes = [];
         selectedClass = null;

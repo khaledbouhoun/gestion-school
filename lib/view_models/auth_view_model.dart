@@ -175,19 +175,11 @@ class AuthViewModel extends ChangeNotifier {
   Future getRubriques() async {
     try {
       statusCode = 0;
-      print(
-        'http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}',
-      );
       http.Response response = await http.post(
         Uri.parse(
           'http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}',
         ),
       );
-      print(
-        "url: http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}",
-      );
-      print(response.body);
-      print(response.statusCode);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         rubriques = Rubrique.listFromJson(data['rubriques']);

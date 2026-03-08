@@ -110,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
           return const Directionality(
             textDirection: TextDirection.rtl,
             child: LicenseActivationPage(),
-          );
+          ); 
         }
 
         return Directionality(
