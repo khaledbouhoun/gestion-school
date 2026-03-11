@@ -19,15 +19,32 @@ class StudentDetails extends StatelessWidget {
             '${studentProvider.selectedStudent!.elvnom} ${studentProvider.selectedStudent!.elvprenom} ${studentProvider.selectedStudent!.elvsexe == "0" ? 'بن' : 'بنت'} ${studentProvider.selectedStudent!.elvprenpere}',
       },
       {'اسم الجد': studentProvider.selectedStudent!.elvprengrpere},
-      {'تاريخ الازدياد': intl.DateFormat('yyyy-MM-dd').format(studentProvider.selectedStudent!.elvdatensc!)},
+      {'رقم هاتف الولي 1': studentProvider.selectedStudent!.elvtel1},
+      {'رقم هاتف الولي 2': studentProvider.selectedStudent!.elvtel2},
+      {
+        'تاريخ الازدياد': intl.DateFormat(
+          'yyyy-MM-dd',
+        ).format(studentProvider.selectedStudent!.elvdatensc!),
+      },
       {'مكان الازدياد': studentProvider.selectedStudent!.elvlieunsc},
       {'الجنس': studentProvider.selectedStudent!.sexe},
-      {'العنوان': studentProvider.selectedStudent!.elvadr1 == '' ? 'لا يوجد' : studentProvider.selectedStudent!.elvadr1},
-      {'خط النقل': studentProvider.selectedStudent!.ltrnom != '' ? studentProvider.selectedStudent!.ltrnom : 'غير معني'},
+      {
+        'العنوان': studentProvider.selectedStudent!.elvadr1 == ''
+            ? 'لا يوجد'
+            : studentProvider.selectedStudent!.elvadr1,
+      },
+      {
+        'خط النقل': studentProvider.selectedStudent!.ltrnom != ''
+            ? studentProvider.selectedStudent!.ltrnom
+            : 'غير معني',
+      },
     ];
     return WillPopScope(
       onWillPop: () async {
-        Navigator.push(context, MaterialPageRoute(builder: (builder) => const Students()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (builder) => const Students()),
+        );
         return false;
       },
       child: Scaffold(
@@ -37,7 +54,11 @@ class StudentDetails extends StatelessWidget {
           title: Center(
             child: Text(
               'تفاصيل التلميذ',
-              style: TextStyle(color: Colors.white, fontSize: width * 0.06, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: width * 0.06,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           automaticallyImplyLeading: false,
@@ -54,7 +75,11 @@ class StudentDetails extends StatelessWidget {
                     itemCount: details.length,
                     itemBuilder: (context, index) {
                       var key = details[index].keys.first;
-                      return DetailCard(title: key, subtitle: details[index][key]);
+                      return DetailCard(
+                        title: key,
+                        subtitle: details[index][key],
+                        numberphone: (index == 2 || index == 3),
+                      );
                     },
                   ),
                 ),

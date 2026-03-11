@@ -9,13 +9,13 @@ class Tranche {
   String? TRCDU;
   String? TRCAU;
   String TRCOBS;
-  double TRCNBHIZEB;
-  double? TRCSOURADE;
-  double? TRCAYADE;
-  double? TRCSOURAA;
-  double? TRCAYAA;
-  double TRCNBTHOMON;
-  double? TRCSENS;
+  int TRCNBHIZEB;
+  int? TRCSOURADE;
+  int? TRCAYADE;
+  int? TRCSOURAA;
+  int? TRCAYAA;
+  int TRCNBTHOMON;
+  int? TRCSENS;
   String ELVNOM;
   String ELVPRENOM;
 
@@ -30,12 +30,12 @@ class Tranche {
     this.TRCDU,
     this.TRCAU,
     this.TRCOBS = '',
-    this.TRCNBHIZEB = 0.0,
+    this.TRCNBHIZEB = 0,
     this.TRCSOURADE,
     this.TRCAYADE,
     this.TRCSOURAA,
     this.TRCAYAA,
-    this.TRCNBTHOMON = 0.0,
+    this.TRCNBTHOMON = 0,
     this.TRCSENS,
     this.ELVNOM = '',
     this.ELVPRENOM = '',
@@ -53,13 +53,13 @@ class Tranche {
       TRCDU: json['TRCDU'],
       TRCAU: json['TRCAU'],
       TRCOBS: json['TRCOBS'] ?? '',
-      TRCNBHIZEB: (json['TRCNBHIZEB'] ?? 0).toDouble(),
-      TRCSOURADE: (json['TRCSOURADE'] ?? 0).toDouble(),
-      TRCAYADE: (json['TRCAYADE'] ?? 0).toDouble(),
-      TRCSOURAA: (json['TRCSOURAA'] ?? 0).toDouble(),
-      TRCAYAA: (json['TRCAYAA'] ?? 0).toDouble(),
-      TRCNBTHOMON: (json['TRCNBTHOMON'] ?? 0).toDouble(),
-      TRCSENS: (json['TRCSENS'] ?? 1).toDouble(),
+      TRCNBHIZEB: ((json['TRCNBHIZEB'] ?? 0) as num).toInt(),
+      TRCSOURADE: ((json['TRCSOURADE'] ?? 0) as num).toInt(),
+      TRCAYADE: ((json['TRCAYADE'] ?? 0) as num).toInt(),
+      TRCSOURAA: ((json['TRCSOURAA'] ?? 0) as num).toInt(),
+      TRCAYAA: ((json['TRCAYAA'] ?? 0) as num).toInt(),
+      TRCNBTHOMON: ((json['TRCNBTHOMON'] ?? 0) as num).toInt(),
+      TRCSENS: ((json['TRCSENS'] ?? 1) as num).toInt(),
       ELVNOM: json['ELVNOM'] ?? '',
       ELVPRENOM: json['ELVPRENOM'] ?? '',
     );
@@ -77,13 +77,13 @@ class Tranche {
       TRCDU: json['TRCDU'],
       TRCAU: json['TRCAU'],
       TRCOBS: json['TRCOBS'] ?? '',
-      TRCNBHIZEB: (json['TRCNBHIZEB'] ?? 0).toDouble(),
-      TRCSOURADE: (json['TRCSOURADE'] ?? 0).toDouble(),
-      TRCAYADE: (json['TRCAYADE'] ?? 0).toDouble(),
-      TRCSOURAA: (json['TRCSOURAA'] ?? 0).toDouble(),
-      TRCAYAA: (json['TRCAYAA'] ?? 0).toDouble(),
-      TRCNBTHOMON: (json['TRCNBTHOMON'] ?? 0).toDouble(),
-      TRCSENS: (json['TRCSENS'] ?? 1).toDouble(),
+      TRCNBHIZEB: ((json['TRCNBHIZEB'] ?? 0) as num).toInt(),
+      TRCSOURADE: ((json['TRCSOURADE'] ?? 0) as num).toInt(),
+      TRCAYADE: ((json['TRCAYADE'] ?? 0) as num).toInt(),
+      TRCSOURAA: ((json['TRCSOURAA'] ?? 0) as num).toInt(),
+      TRCAYAA: ((json['TRCAYAA'] ?? 0) as num).toInt(),
+      TRCNBTHOMON: ((json['TRCNBTHOMON'] ?? 0) as num).toInt(),
+      TRCSENS: ((json['TRCSENS'] ?? 1) as num).toInt(),
       ELVNOM: json['ELVNOM'] ?? '',
       ELVPRENOM: json['ELVPRENOM'] ?? '',
     );

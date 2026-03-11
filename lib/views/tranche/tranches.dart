@@ -39,7 +39,10 @@ class TranchesPage extends State<Tranches> with Quran {
         builder: (context, trancheProvider, systemProvider, child) {
           return WillPopScope(
             onWillPop: () async {
-              Navigator.push(context, MaterialPageRoute(builder: (builder) => const Home()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (builder) => const Home()),
+              );
               return false;
             },
             child: RefreshIndicator(
@@ -55,7 +58,11 @@ class TranchesPage extends State<Tranches> with Quran {
                   title: Center(
                     child: Text(
                       'التحصيل القرآني',
-                      style: TextStyle(color: Colors.white, fontSize: width * 0.07, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: width * 0.07,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -70,9 +77,15 @@ class TranchesPage extends State<Tranches> with Quran {
                         padding: EdgeInsets.all(width * 0.02),
                         decoration: BoxDecoration(
                           color: Theme.of(context).secondaryHeaderColor,
-                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                          borderRadius: const BorderRadius.vertical(
+                            bottom: Radius.circular(20),
+                          ),
                           boxShadow: [
-                            BoxShadow(color: Theme.of(context).secondaryHeaderColor, blurRadius: 30.0, offset: const Offset(0.0, 0.75)),
+                            BoxShadow(
+                              color: Theme.of(context).secondaryHeaderColor,
+                              blurRadius: 30.0,
+                              offset: const Offset(0.0, 0.75),
+                            ),
                           ],
                         ),
                         child: Column(
@@ -82,20 +95,29 @@ class TranchesPage extends State<Tranches> with Quran {
                             SizedBox(
                               width: width * 0.65,
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     'الفصل',
-                                    style: TextStyle(color: Colors.white, fontSize: width * 0.05, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: width * 0.05,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: width * 0.009),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: width * 0.009,
+                                    ),
                                     width: width * 0.45,
                                     height: width * 0.1,
                                     decoration: const BoxDecoration(
                                       color: Colors.white,
-                                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(10),
+                                      ),
                                     ),
                                     child: DropdownButton<Period>(
                                       value: trancheProvider.selectedPeriod,
@@ -106,30 +128,44 @@ class TranchesPage extends State<Tranches> with Quran {
                                         trancheProvider.notifyListeners();
                                         trancheProvider.getTranches();
                                       },
-                                      items: systemProvider.periods!.map<DropdownMenuItem<Period>>((Period period) {
-                                        return DropdownMenuItem<Period>(
-                                          value: period,
-                                          child: Directionality(
-                                            textDirection: TextDirection.rtl,
-                                            child: Container(
-                                              padding: EdgeInsets.only(left: width * 0.02),
-                                              width: width * 0.4,
-                                              decoration: const BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.all(Radius.circular(15)),
-                                              ),
-                                              child: Text(
-                                                period.PERNOM,
-                                                style: TextStyle(
-                                                  fontSize: width * 0.04,
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.normal,
+                                      items: systemProvider.periods!
+                                          .map<DropdownMenuItem<Period>>((
+                                            Period period,
+                                          ) {
+                                            return DropdownMenuItem<Period>(
+                                              value: period,
+                                              child: Directionality(
+                                                textDirection:
+                                                    TextDirection.rtl,
+                                                child: Container(
+                                                  padding: EdgeInsets.only(
+                                                    left: width * 0.02,
+                                                  ),
+                                                  width: width * 0.4,
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                              Radius.circular(
+                                                                15,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                  child: Text(
+                                                    period.PERNOM,
+                                                    style: TextStyle(
+                                                      fontSize: width * 0.04,
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.normal,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
+                                            );
+                                          })
+                                          .toList(),
                                     ),
                                   ),
                                 ],
@@ -138,54 +174,78 @@ class TranchesPage extends State<Tranches> with Quran {
                             SizedBox(
                               width: width * 0.65,
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     'الفوج',
-                                    style: TextStyle(color: Colors.white, fontSize: width * 0.05, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: width * 0.05,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: width * 0.009),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: width * 0.009,
+                                    ),
                                     width: width * 0.45,
                                     height: width * 0.1,
                                     decoration: const BoxDecoration(
                                       color: Colors.white,
-                                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(10),
+                                      ),
                                     ),
                                     child: DropdownButton<Class>(
                                       value: trancheProvider.selectedClass,
                                       underline: Container(),
                                       isExpanded: true,
                                       onChanged: (Class? selectedClass) {
-                                        trancheProvider.selectedClass = selectedClass;
+                                        trancheProvider.selectedClass =
+                                            selectedClass;
                                         trancheProvider.notifyListeners();
                                         trancheProvider.getTranches();
                                       },
-                                      items: systemProvider.classes?.map<DropdownMenuItem<Class>>((Class selectedClass) {
-                                        return DropdownMenuItem<Class>(
-                                          value: selectedClass,
-                                          child: Directionality(
-                                            textDirection: TextDirection.rtl,
-                                            child: Container(
-                                              padding: EdgeInsets.only(left: width * 0.02),
-                                              width: width * 0.4,
-                                              decoration: const BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.all(Radius.circular(15)),
-                                              ),
-                                              child: Text(
-                                                selectedClass.CLSNOM,
-                                                style: TextStyle(
-                                                  fontSize: width * 0.04,
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.normal,
+                                      items: systemProvider.classes
+                                          ?.map<DropdownMenuItem<Class>>((
+                                            Class selectedClass,
+                                          ) {
+                                            return DropdownMenuItem<Class>(
+                                              value: selectedClass,
+                                              child: Directionality(
+                                                textDirection:
+                                                    TextDirection.rtl,
+                                                child: Container(
+                                                  padding: EdgeInsets.only(
+                                                    left: width * 0.02,
+                                                  ),
+                                                  width: width * 0.4,
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                              Radius.circular(
+                                                                15,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                  child: Text(
+                                                    selectedClass.CLSNOM,
+                                                    style: TextStyle(
+                                                      fontSize: width * 0.04,
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.normal,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
+                                            );
+                                          })
+                                          .toList(),
                                     ),
                                   ),
                                 ],
@@ -197,39 +257,63 @@ class TranchesPage extends State<Tranches> with Quran {
                       Expanded(
                         child: trancheProvider.statusCode == 200
                             ? Container(
-                                padding: EdgeInsets.only(left: width * 0.02, right: width * 0.02, bottom: width * 0.02),
+                                padding: EdgeInsets.only(
+                                  left: width * 0.02,
+                                  right: width * 0.02,
+                                  bottom: width * 0.02,
+                                ),
                                 child: ListView.builder(
                                   itemCount: trancheProvider.tranches?.length,
                                   itemBuilder: (context, index) {
-                                    return TrancheWidget(tranche: trancheProvider.tranches![index]);
+                                    return TrancheWidget(
+                                      tranche: trancheProvider.tranches![index],
+                                    );
                                   },
                                 ),
                               )
                             : trancheProvider.statusCode == 404
                             ? Center(
-                                child: Text('لا توجد غيابات في هذه المدة', style: TextStyle(fontSize: width * 0.05)),
+                                child: Text(
+                                  'لا توجد تحصيلات قرآنية',
+                                  style: TextStyle(fontSize: width * 0.05),
+                                ),
                               )
                             : trancheProvider.statusCode == 0
                             ? const Center(child: CircularProgressIndicator())
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('تعذر الإتصال بالخادم', style: TextStyle(fontSize: width * 0.05)),
+                                  Text(
+                                    'تعذر الإتصال بالخادم',
+                                    style: TextStyle(fontSize: width * 0.05),
+                                  ),
                                   SizedBox(height: height * 0.02),
                                   ElevatedButton(
-                                    style: ButtonStyle(padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.zero)),
+                                    style: ButtonStyle(
+                                      padding:
+                                          WidgetStateProperty.all<EdgeInsets>(
+                                            EdgeInsets.zero,
+                                          ),
+                                    ),
                                     onPressed: () {
                                       trancheProvider.getTranches();
                                     },
                                     child: Container(
                                       padding: EdgeInsets.all(width * 0.03),
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context).secondaryHeaderColor,
-                                        borderRadius: const BorderRadius.all(Radius.circular(20)),
+                                        color: Theme.of(
+                                          context,
+                                        ).secondaryHeaderColor,
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(20),
+                                        ),
                                       ),
                                       child: const Text(
                                         'حاول مجددا',
-                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -245,7 +329,8 @@ class TranchesPage extends State<Tranches> with Quran {
                     overlayColor: WidgetStatePropertyAll(Colors.transparent),
                   ),
                   onPressed: () async {
-                    if (authProvider.selectedYear!.ANECLOSE == 0 && trancheProvider.selectedPeriod!.ANPCLOSE == 0) {
+                    if (authProvider.selectedYear!.ANECLOSE == 0 &&
+                        trancheProvider.selectedPeriod!.ANPCLOSE == 0) {
                       await trancheProvider.getStudentsWithoutTranche();
                       if (trancheProvider.students!.isEmpty) {
                         Toast(
@@ -257,30 +342,42 @@ class TranchesPage extends State<Tranches> with Quran {
                         return;
                       }
                       trancheProvider.newTranche = Tranche();
-                      trancheProvider.newTranche?.TRCELV = trancheProvider.students!.first.elvno;
-                      trancheProvider.newTranche?.TRCANE = trancheProvider.selectedClass!.CLSANE;
-                      trancheProvider.newTranche?.TRCPER = trancheProvider.selectedPeriod!.PERNO;
-                      trancheProvider.newTranche?.TRCCYC = trancheProvider.selectedClass!.CLSCYC;
-                      trancheProvider.newTranche?.TRCNIV = trancheProvider.selectedClass!.CLSNIV;
-                      trancheProvider.newTranche?.TRCCLS = trancheProvider.selectedClass!.CLSNO;
-                      trancheProvider.newTranche?.TRCSPC = trancheProvider.selectedClass!.CLSSPC;
+                      trancheProvider.newTranche?.TRCELV =
+                          trancheProvider.students!.first.elvno;
+                      trancheProvider.newTranche?.TRCANE =
+                          trancheProvider.selectedClass!.CLSANE;
+                      trancheProvider.newTranche?.TRCPER =
+                          trancheProvider.selectedPeriod!.PERNO;
+                      trancheProvider.newTranche?.TRCCYC =
+                          trancheProvider.selectedClass!.CLSCYC;
+                      trancheProvider.newTranche?.TRCNIV =
+                          trancheProvider.selectedClass!.CLSNIV;
+                      trancheProvider.newTranche?.TRCCLS =
+                          trancheProvider.selectedClass!.CLSNO;
+                      trancheProvider.newTranche?.TRCSPC =
+                          trancheProvider.selectedClass!.CLSSPC;
                       trancheProvider.newTranche?.TRCSENS = 1;
                       trancheProvider.newTranche?.TRCSOURADE = 1;
                       trancheProvider.newTranche?.TRCAYADE = 1;
                       trancheProvider.newTranche?.TRCSOURAA = 1;
                       trancheProvider.newTranche?.TRCAYAA = 1;
+
                       AddTrancheDialog.showAddDialog(context);
                     }
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: authProvider.selectedYear!.ANECLOSE == 0 && trancheProvider.selectedPeriod!.ANPCLOSE == 0
+                      color:
+                          authProvider.selectedYear!.ANECLOSE == 0 &&
+                              trancheProvider.selectedPeriod!.ANPCLOSE == 0
                           ? Theme.of(context).secondaryHeaderColor
                           : Colors.grey,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: authProvider.selectedYear!.ANECLOSE == 0 && trancheProvider.selectedPeriod!.ANPCLOSE == 0
+                          color:
+                              authProvider.selectedYear!.ANECLOSE == 0 &&
+                                  trancheProvider.selectedPeriod!.ANPCLOSE == 0
                               ? Theme.of(context).secondaryHeaderColor
                               : Colors.grey,
                           blurRadius: 20.0,
@@ -288,10 +385,15 @@ class TranchesPage extends State<Tranches> with Quran {
                         ),
                       ],
                     ),
-                    child: Icon(Icons.add, color: Colors.white, size: width * 0.15),
+                    child: Icon(
+                      Icons.add,
+                      color: Colors.white,
+                      size: width * 0.15,
+                    ),
                   ),
                 ),
-                floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.centerFloat,
               ),
             ),
           );

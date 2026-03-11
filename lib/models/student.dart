@@ -6,6 +6,8 @@ class Student {
   String? elvprengrpere;
   DateTime? elvdatensc;
   String? elvlieunsc;
+  String? elvtel1;
+  String? elvtel2;
   String? sexe;
   String? elvadr1;
   String? ltrnom;
@@ -19,6 +21,8 @@ class Student {
     this.elvprengrpere,
     this.elvdatensc,
     this.elvlieunsc,
+    this.elvtel1,
+    this.elvtel2,
     this.sexe,
     this.elvadr1,
     this.ltrnom,
@@ -32,6 +36,8 @@ class Student {
     elvprenpere = json['elvprenpere'];
     elvprengrpere = json['elvprengrpere'];
     elvdatensc = json['elvdatensc'] != null ? DateTime.parse(json['elvdatensc']) : null;
+    elvtel1 = json['elvtel1'];
+    elvtel2 = json['elvtel2'];
     elvlieunsc = json['elvlieunsc'];
     sexe = json['sexe'];
     elvadr1 = json['elvadr1'];
