@@ -8,6 +8,8 @@ class Absence {
   String EABJUSTIF;
   String ELVNOM;
   String ELVPRENOM;
+  String? ELVtel1;
+  String? ELVtel2;
   String? AFFCLS;
   double? ELVSEXE;
 
@@ -22,6 +24,9 @@ class Absence {
     this.ELVNOM = '',
     this.ELVPRENOM = '',
     this.AFFCLS,
+    this.ELVtel1,
+    this.ELVtel2,
+
     this.ELVSEXE = 0,
   });
 
@@ -36,6 +41,8 @@ class Absence {
       EABJUSTIF: json['eabjustif'] as String? ?? '',
       ELVNOM: json['elvnom'] as String? ?? '',
       ELVPRENOM: json['elvprenom'] as String? ?? '',
+      ELVtel1: json['elvtel1'] as String? ?? '',
+      ELVtel2: json['elvtel2'] as String? ?? '',
       AFFCLS: json['affcls'] as String? ?? '',
       ELVSEXE: (json['elvsexe'] as num?)?.toDouble() ?? 0,
     );
@@ -52,6 +59,8 @@ class Absence {
       EABJUSTIF: json['EABJUSTIF'] as String? ?? '',
       ELVNOM: json['ELVNOM'] as String? ?? '',
       ELVPRENOM: json['ELVPRENOM'] as String? ?? '',
+      ELVtel1: json['ELVtel1'] as String? ?? '',
+      ELVtel2: json['ELVtel2'] as String? ?? '',
       AFFCLS: json['AFFCLS'] as String? ?? '',
       ELVSEXE: (json['ELVSEXE'] as num?)?.toDouble() ?? 0,
     );
@@ -68,6 +77,8 @@ class Absence {
       'EABJUSTIF': EABJUSTIF,
       'ELVNOM': ELVNOM,
       'ELVPRENOM': ELVPRENOM,
+      'ELVtel1': ELVtel1,
+      'ELVtel2': ELVtel2,
       'AFFCLS': AFFCLS,
       'ELVSEXE': ELVSEXE,
     };

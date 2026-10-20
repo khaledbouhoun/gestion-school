@@ -1,10 +1,12 @@
 import 'dart:convert';
+
 import 'package:al_moiin/models/discipline.dart';
 import 'package:al_moiin/models/period.dart';
 import 'package:al_moiin/view_models/auth_view_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+
 import '../models/class.dart';
 import '../models/discipline_type.dart';
 
@@ -51,9 +53,13 @@ class DisciplineViewModel extends ChangeNotifier {
     try {
       disciplineTypesStatusCode = 0;
       http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Type_Disciplines'),
+        Uri.parse('${authViewModel!.url}/Get_Type_Disciplines'),
         body: jsonEncode({'path': authViewModel!.selectedFolder?.DOSBDD, 'type': selectedType}),
       );
+      debugPrint('${authViewModel!.url}/Get_Type_Disciplines');
+      debugPrint(jsonEncode({'path': authViewModel!.selectedFolder?.DOSBDD, 'type': selectedType}));
+      debugPrint(response.body);
+
       disciplineTypesStatusCode = response.statusCode;
       if (disciplineTypesStatusCode == 200) {
         dynamic data = jsonDecode(response.body);
@@ -94,8 +100,14 @@ class DisciplineViewModel extends ChangeNotifier {
   Future<void> getDisciplines() async {
     try {
       statusCode = 0;
+      if (selectedDisciplineType?.DECNO == null) {
+        disciplines = [];
+        statusCode = 404;
+        notifyListeners();
+        return;
+      }
       http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Disciplines'),
+        Uri.parse('${authViewModel!.url}/Get_Disciplines'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'cycle': selectedClass?.CLSCYC,
@@ -107,6 +119,19 @@ class DisciplineViewModel extends ChangeNotifier {
           'discipline': selectedDisciplineType?.DECNO,
         }),
       );
+      // debugPrint(response.request.toString());
+      // debugPrint('''
+      //     'path': ${authViewModel!.selectedFolder?.DOSBDD},
+      //     'cycle': ${selectedClass?.CLSCYC},
+      //     'level': ${selectedClass?.CLSNIV},
+      //     'class': ${selectedClass?.CLSNO},
+      //     'speciality': ${selectedClass?.CLSSPC},
+      //     'year': ${authViewModel!.selectedYear?.ANENO},
+      //     'period': ${selectedPeriod?.PERNO},
+      //     'discipline': ${selectedDisciplineType?.DECNO},
+      //  ''');
+
+      // debugPrint(response.body);
       statusCode = response.statusCode;
       if (statusCode == 200) {
         dynamic data = jsonDecode(response.body);
@@ -131,17 +156,13 @@ class DisciplineViewModel extends ChangeNotifier {
         'student': newDiscipline?.DEVELV,
         'year': newDiscipline?.DEVANE,
         'period': newDiscipline?.DEVPER,
-        'date':
-            '${DateFormat('yyyy-MM-dd').format(newDiscipline!.DEVDATE)} ${newDiscipline?.DEVDATE.hour.toString().padLeft(2, '0')}:${newDiscipline?.DEVDATE.minute.toString().padLeft(2, '0')}',
+        'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
         'discipline': newDiscipline?.DEVDEC,
         'observation': newDiscipline?.DEVOBSERV,
       };
+      print("// Adding discipline: $body");
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_New_Disciplines'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Get_New_Disciplines'), headers: headers, body: jsonEncode(body));
       print(response.body);
       addStatusCode = response.statusCode;
       notifyListeners();
@@ -168,11 +189,7 @@ class DisciplineViewModel extends ChangeNotifier {
         'old_discipline': oldDiscipiline,
       };
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Modify_Disciplines'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Get_Modify_Disciplines'), headers: headers, body: jsonEncode(body));
       modifyStatusCode = response.statusCode;
       notifyListeners();
     } catch (err) {
@@ -195,11 +212,7 @@ class DisciplineViewModel extends ChangeNotifier {
         'discipline': deletedDiscipline.DEVDEC,
       };
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Delete_Disciplines'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Get_Delete_Disciplines'), headers: headers, body: jsonEncode(body));
       print(response.body);
       deleteStatusCode = response.statusCode;
       notifyListeners();

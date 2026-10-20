@@ -3,6 +3,7 @@ import 'package:al_moiin/models/discipline.dart';
 import 'package:al_moiin/models/discipline_type.dart';
 import 'package:al_moiin/models/period.dart';
 import 'package:al_moiin/view_models/discipline_view_model.dart';
+import 'package:al_moiin/view_models/student_view_model.dart';
 import 'package:al_moiin/view_models/system_view_model.dart';
 import 'package:al_moiin/widgets/add_discipline_dialog.dart';
 import 'package:al_moiin/widgets/discipline_widget.dart';
@@ -326,7 +327,7 @@ class DisciplinesPage extends State<Disciplines> {
                               )
                             : disciplineProvider.statusCode == 404
                             ? Center(
-                                child: Text('لا توجد إجازات/مخالفات في هذه المدة', style: TextStyle(fontSize: width * 0.05)),
+                                child: Text('لا توجد إجازات/مخالفات', style: TextStyle(fontSize: width * 0.05)),
                               )
                             : disciplineProvider.statusCode == 500
                             ? Column(
@@ -365,16 +366,20 @@ class DisciplinesPage extends State<Disciplines> {
                     padding: WidgetStatePropertyAll(EdgeInsets.zero),
                     overlayColor: WidgetStatePropertyAll(Colors.transparent),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (authProvider.selectedYear!.ANECLOSE == 0 && disciplineProvider.selectedPeriod!.ANPCLOSE == 0) {
                       var disciplineProvider = Provider.of<DisciplineViewModel>(context, listen: false);
                       var systemProvider = Provider.of<SystemViewModel>(context, listen: false);
                       var authProvider = Provider.of<AuthViewModel>(context, listen: false);
+                      var studentProvider = Provider.of<StudentViewModel>(context, listen: false);
                       disciplineProvider.newDiscipline = Discipline();
                       disciplineProvider.newDiscipline?.DEVANE = authProvider.selectedYear!.ANENO;
-                      disciplineProvider.newDiscipline?.DEVPER = systemProvider.selectedPeriod!.ANPPER;
+                      disciplineProvider.newDiscipline?.DEVPER = disciplineProvider.selectedPeriod!.ANPPER;
                       disciplineProvider.newDiscipline?.DECTYPE = disciplineProvider.types.first;
-                      disciplineProvider.newDiscipline?.DEVDATE = systemProvider.dateOfDay!;
+                      disciplineProvider.newDiscipline?.DEVDATE = DateTime.now();
+                      await studentProvider.getStudents(disciplineProvider.selectedClass!, systemProvider.selectedPeriod!);
+                      disciplineProvider.notifyListeners();
+  
                       AddDisciplineDialog.showAddDialog(context);
                     }
                   },

@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:al_moiin/view_models/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import '../models/class.dart';
 import '../models/period.dart';
 import '../models/student.dart';
@@ -20,9 +22,7 @@ class StudentViewModel extends ChangeNotifier {
       filtredStudent = [];
       statusCode = 0;
       http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Student',
-        ),
+        Uri.parse('${authViewModel!.url}/Get_Student'),
         body: jsonEncode({
           'path': authViewModel?.selectedFolder?.DOSBDD,
           'year': authViewModel?.selectedYear?.ANENO,

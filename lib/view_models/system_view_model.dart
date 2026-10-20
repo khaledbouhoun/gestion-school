@@ -1,9 +1,11 @@
 import 'dart:convert';
+
 import 'package:al_moiin/login.dart';
 import 'package:al_moiin/models/Etablissement.dart';
 import 'package:al_moiin/view_models/auth_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import '../models/class.dart';
 import '../models/period.dart';
 
@@ -27,18 +29,14 @@ class SystemViewModel extends ChangeNotifier {
     try {
       etablissementStatusCode = 0;
       http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Etablissement',
-        ),
+        Uri.parse('${authViewModel!.url}/Get_Etablissement'),
         body: jsonEncode({'path': authViewModel?.selectedFolder?.DOSBDD}),
       );
       print("bdd: ${authViewModel?.selectedFolder?.DOSBDD}");
       etablissementStatusCode = response.statusCode;
       if (etablissementStatusCode == 200) {
         dynamic data = jsonDecode(response.body);
-        selectedEtablissement = Etablissement.fromJson(
-          data['etablissement'][0],
-        );
+        selectedEtablissement = Etablissement.fromJson(data['etablissement'][0]);
         dateOfDay = DateTime.tryParse(data['day']);
       }
       notifyListeners();
@@ -52,25 +50,16 @@ class SystemViewModel extends ChangeNotifier {
   Future<void> getPeriods() async {
     try {
       periodStatusCode = 0;
-      print(
-        "body: {'path': ${authViewModel?.selectedFolder?.DOSBDD}, 'year': ${authViewModel?.selectedYear?.ANENO}}",
-      );
+      print("body: {'path': ${authViewModel?.selectedFolder?.DOSBDD}, 'year': ${authViewModel?.selectedYear?.ANENO}}");
       http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Periods',
-        ),
-        body: jsonEncode({
-          'path': authViewModel?.selectedFolder?.DOSBDD,
-          'year': authViewModel?.selectedYear?.ANENO,
-        }),
+        Uri.parse('${authViewModel!.url}/Get_Periods'),
+        body: jsonEncode({'path': authViewModel?.selectedFolder?.DOSBDD, 'year': authViewModel?.selectedYear?.ANENO}),
       );
       periodStatusCode = response.statusCode;
       if (periodStatusCode == 200) {
         dynamic data = jsonDecode(response.body);
         periods = Period.listFromJson(data['periods']);
-        selectedPeriod = periods?.firstWhere(
-          (element) => element.ANPCLOSE == 0,
-        );
+        selectedPeriod = periods?.firstWhere((element) => element.ANPCLOSE == 0);
       }
       notifyListeners();
     } catch (err) {
@@ -85,8 +74,7 @@ class SystemViewModel extends ChangeNotifier {
       List<Map<String, dynamic>> selectedClasses = [];
 
       authViewModel?.rubriques?.forEach((element) {
-        if (element.USBTRB == '01' &&
-            element.USBANE == authViewModel!.selectedYear!.ANENO) {
+        if (element.USBTRB == '01' && element.USBANE == authViewModel!.selectedYear!.ANENO) {
           selectedClasses.add(element.toJson());
         }
       });
@@ -97,9 +85,7 @@ class SystemViewModel extends ChangeNotifier {
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
             backgroundColor: Colors.orange.shade700,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             duration: const Duration(seconds: 2),
             content: Row(
               children: const [
@@ -108,11 +94,7 @@ class SystemViewModel extends ChangeNotifier {
                 Expanded(
                   child: Text(
                     "يرجى ملئ المصادر لهذا الأستاذ",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
                   ),
                 ),
               ],
@@ -121,31 +103,16 @@ class SystemViewModel extends ChangeNotifier {
         );
 
         Future.delayed(const Duration(seconds: 2), () {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (builder) => Login()),
-            (route) => false,
-          );
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (builder) => Login()), (route) => false);
         });
 
         return;
       }
 
-      Map<String, String> headers = {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-      };
-      Map<String, dynamic> body = {
-        'path': authViewModel?.selectedFolder?.DOSBDD,
-        'classes': selectedClasses,
-      };
+      Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
+      Map<String, dynamic> body = {'path': authViewModel?.selectedFolder?.DOSBDD, 'classes': selectedClasses};
       classStatusCode = 0;
-      http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Classes',
-        ),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Get_Classes'), headers: headers, body: jsonEncode(body));
       classStatusCode = response.statusCode;
       if (classStatusCode == 200) {
         dynamic data = jsonDecode(response.body);

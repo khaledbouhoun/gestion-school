@@ -120,13 +120,13 @@ class AddAbsenceDialogPage extends State<AddAbsenceDialog> {
                             borderRadius: const BorderRadius.all(Radius.circular(10)),
                           ),
                           child: DropdownButton<Class>(
-                            value: systemProvider.selectedClass,
+                            value: absenceProvider.selectedClass,
                             underline: Container(),
                             isExpanded: true,
                             onChanged: (Class? selectedClass) async {
                               absenceProvider.newAbsence?.EABELV = null;
-                              systemProvider.selectedClass = selectedClass;
-                              await studentProvider.getStudents(systemProvider.selectedClass!, systemProvider.selectedPeriod!);
+                              absenceProvider.selectedClass = selectedClass;
+                              await studentProvider.getStudents(absenceProvider.selectedClass!, absenceProvider.selectedPeriod!);
                               absenceProvider.notifyListeners();
                               studentProvider.notifyListeners();
                             },
@@ -343,8 +343,8 @@ class AddAbsenceDialogPage extends State<AddAbsenceDialog> {
       Toast(context: context, title: 'يرجى اختيار التلميذ', style: ToastificationStyle.minimal, type: ToastificationType.error);
     } else if (duration.text == '') {
       Toast(context: context, title: 'يرجى ادخال مدة الغياب', style: ToastificationStyle.minimal, type: ToastificationType.error);
-    } else if (systemProvider.selectedPeriod?.ANPDEB.compareTo(absenceProvider.newAbsence!.EABDATE!) == -1 &&
-        systemProvider.selectedPeriod?.ANPFIN.compareTo(absenceProvider.newAbsence!.EABDATE!) == 1) {
+    } else if (absenceProvider.selectedPeriod?.ANPDEB.compareTo(absenceProvider.newAbsence!.EABDATE!) == -1 &&
+        absenceProvider.selectedPeriod?.ANPFIN.compareTo(absenceProvider.newAbsence!.EABDATE!) == 1) {
       absenceProvider.newAbsence!.EABDUREE = double.parse(duration.text);
       absenceProvider.newAbsence!.EABJUSTIF = justification.text;
       await absenceProvider.addNewAbsence();

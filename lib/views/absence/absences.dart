@@ -2,6 +2,7 @@ import 'package:al_moiin/home.dart';
 import 'package:al_moiin/models/absence.dart';
 import 'package:al_moiin/models/period.dart';
 import 'package:al_moiin/view_models/absence_view_model.dart';
+import 'package:al_moiin/view_models/student_view_model.dart';
 import 'package:al_moiin/view_models/system_view_model.dart';
 import 'package:al_moiin/widgets/absence_widget.dart';
 import 'package:al_moiin/widgets/add_absence_dialog.dart';
@@ -83,7 +84,7 @@ class AbsencesPage extends State<Absences> {
                                 spacing: 15,
                                 children: [
                                   Text(
-                                    'الفصل',
+                                    'الفصل ',
                                     style: TextStyle(color: Colors.white, fontSize: width * 0.05, fontWeight: FontWeight.bold),
                                   ),
                                   Container(
@@ -141,7 +142,7 @@ class AbsencesPage extends State<Absences> {
                                 spacing: 15,
                                 children: [
                                   Text(
-                                    'الفوج',
+                                    'الفوج  ',
                                     style: TextStyle(color: Colors.white, fontSize: width * 0.05, fontWeight: FontWeight.bold),
                                   ),
                                   Container(
@@ -197,7 +198,7 @@ class AbsencesPage extends State<Absences> {
                                 spacing: 35,
                                 children: [
                                   Text(
-                                    'من',
+                                    'من  ',
                                     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: width * 0.05),
                                   ),
                                   Container(
@@ -236,7 +237,7 @@ class AbsencesPage extends State<Absences> {
                                 spacing: 35,
                                 children: [
                                   Text(
-                                    'إلى',
+                                    'إلى  ',
                                     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: width * 0.05),
                                   ),
                                   Container(
@@ -284,7 +285,7 @@ class AbsencesPage extends State<Absences> {
                               )
                             : absenceProvider.statusCode == 404
                             ? Center(
-                                child: Text('لا توجد غيابات في هذه المدة', style: TextStyle(fontSize: width * 0.05)),
+                                child: Text('لا توجد غيابات', style: TextStyle(fontSize: width * 0.05)),
                               )
                             : absenceProvider.statusCode == 0
                             ? const Center(child: CircularProgressIndicator())
@@ -321,16 +322,19 @@ class AbsencesPage extends State<Absences> {
                     padding: WidgetStatePropertyAll(EdgeInsets.zero),
                     overlayColor: WidgetStatePropertyAll(Colors.transparent),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (authProvider.selectedYear!.ANECLOSE == 0 && absenceProvider.selectedPeriod!.ANPCLOSE == 0) {
                       var absenceProvider = Provider.of<AbsenceViewModel>(context, listen: false);
                       var systemProvider = Provider.of<SystemViewModel>(context, listen: false);
                       var authProvider = Provider.of<AuthViewModel>(context, listen: false);
+                      var studentProvider = Provider.of<StudentViewModel>(context, listen: false);
                       absenceProvider.newAbsence = Absence();
                       absenceProvider.newAbsence?.EABANE = authProvider.selectedYear!.ANENO;
-                      absenceProvider.newAbsence?.EABPER = systemProvider.selectedPeriod!.ANPPER;
+                      absenceProvider.newAbsence?.EABPER = absenceProvider.selectedPeriod!.ANPPER;
                       absenceProvider.newAbsence?.EABTYPE = absenceProvider.absenceTypes.first.TABNO;
                       absenceProvider.newAbsence?.EABDATE = systemProvider.dateOfDay;
+                      await studentProvider.getStudents(absenceProvider.selectedClass!, absenceProvider.selectedPeriod!);
+                      absenceProvider.notifyListeners();
                       AddAbsenceDialog.showAddDialog(context);
                     }
                   },

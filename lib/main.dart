@@ -1,12 +1,11 @@
-import 'package:al_moiin/devicehelper.dart';
 import 'package:al_moiin/view_models/absence_view_model.dart';
 import 'package:al_moiin/view_models/auth_view_model.dart';
 import 'package:al_moiin/view_models/discipline_view_model.dart';
+import 'package:al_moiin/view_models/license_view_model.dart';
 import 'package:al_moiin/view_models/note_view_model.dart';
 import 'package:al_moiin/view_models/student_view_model.dart';
 import 'package:al_moiin/view_models/system_view_model.dart';
 import 'package:al_moiin/view_models/tranche_view_model.dart';
-import 'package:al_moiin/view_models/license_view_model.dart';
 import 'package:al_moiin/views/license_activation_page.dart';
 import 'package:al_moiin/widgets/toast.dart';
 import 'package:arabic_font/arabic_font.dart';
@@ -31,13 +30,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => systemViewModel),
         ChangeNotifierProvider(create: (_) => licenseViewModel),
         ChangeNotifierProvider(create: (_) => StudentViewModel(authViewModel)),
-        ChangeNotifierProvider(
-          create: (_) => AbsenceViewModel(authViewModel, systemViewModel),
-        ),
+        ChangeNotifierProvider(create: (_) => AbsenceViewModel(authViewModel, systemViewModel)),
         ChangeNotifierProvider(create: (_) => NoteViewModel(authViewModel)),
-        ChangeNotifierProvider(
-          create: (_) => DisciplineViewModel(authViewModel),
-        ),
+        ChangeNotifierProvider(create: (_) => DisciplineViewModel(authViewModel)),
         ChangeNotifierProvider(create: (_) => TrancheViewModel(authViewModel)),
       ],
       child: const MyApp(),
@@ -56,25 +51,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: const Color.fromRGBO(236, 236, 241, 1.0),
-        fontFamily: ArabicThemeData.font(
-          arabicFont: ArabicFont.dinNextLTArabic,
-        ),
+        fontFamily: ArabicThemeData.font(arabicFont: ArabicFont.dinNextLTArabic),
         package: ArabicThemeData.package,
-        secondaryHeaderColor: const Color.fromRGBO(
-          21,
-          176,
-          130,
-          1,
-        ), //light blue
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Theme.of(context).secondaryHeaderColor,
-        ),
+        secondaryHeaderColor: const Color.fromRGBO(21, 176, 130, 1), //light blue
+        colorScheme: ColorScheme.fromSeed(seedColor: Theme.of(context).secondaryHeaderColor),
         useMaterial3: true,
       ),
-      home: const Directionality(
-        textDirection: TextDirection.rtl,
-        child: MyHomePage(),
-      ),
+      home: const Directionality(textDirection: TextDirection.rtl, child: MyHomePage()),
     );
   }
 }
@@ -99,45 +82,34 @@ class _MyHomePageState extends State<MyHomePage> {
     return FutureBuilder<CheckResult>(
       future: licenseViewModel.checkActivationStatus(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting &&
-            !licenseViewModel.isActivated) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+        if (snapshot.connectionState == ConnectionState.waiting && !licenseViewModel.isActivated) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
         if (!licenseViewModel.isActivated) {
-          return const Directionality(
-            textDirection: TextDirection.rtl,
-            child: LicenseActivationPage(),
-          ); 
+          return const Directionality(textDirection: TextDirection.rtl, child: LicenseActivationPage());
         }
 
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AskFirst(),
-        );
+        return Directionality(textDirection: TextDirection.rtl, child: AskFirst());
       },
     );
   }
 
-  getIPAddress() async {
+  Future<void> getIPAddress() async {
     var authProvider = Provider.of<AuthViewModel>(context, listen: false);
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? ip = prefs.getString('ip_address');
-    String? port = prefs.getString('port');
-    if (ip == null || port == null) {
-      ip = '192.168.1.65';
-      port = '8181';
-      prefs.setString('ip_address', ip);
-      prefs.setString('port', port);
-    }
-    authProvider.ip_address = ip;
-    authProvider.port = port;
+
+    authProvider.ip_address = prefs.getString('ip_address') ?? '';
+    authProvider.port = prefs.getString('port') ?? '';
+    authProvider.useDirectUrl = prefs.getBool('useDirectUrl') ?? false;
+
     Toast(
       context: context,
       title:
-          'Adresse ip: ${authProvider.ip_address}\nPort: ${authProvider.port}',
+          'Address: ${authProvider.ip_address}'
+          '\nPort: ${authProvider.useDirectUrl ? "-" : authProvider.port}'
+          '\nMode: ${authProvider.useDirectUrl ? "Direct URL" : "IP + Port"}',
       style: ToastificationStyle.minimal,
       type: ToastificationType.info,
     );

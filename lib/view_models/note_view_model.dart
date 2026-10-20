@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:al_moiin/models/evaluation.dart';
 import 'package:al_moiin/models/group_observation.dart';
 import 'package:al_moiin/models/modules_group.dart';
@@ -8,11 +9,11 @@ import 'package:al_moiin/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:toastification/toastification.dart';
+
 import '../models/class.dart';
 import '../models/module.dart';
 import '../models/note.dart';
 import '../models/period.dart';
-import 'package:intl/intl.dart';
 
 class NoteViewModel extends ChangeNotifier {
   AuthViewModel? authViewModel;
@@ -83,11 +84,7 @@ class NoteViewModel extends ChangeNotifier {
       moduleStatusCode = 0;
       noteStatusCode = 0;
 
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Modules'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Get_Modules'), headers: headers, body: jsonEncode(body));
       moduleStatusCode = response.statusCode;
       print('Get_Modules: ${response.statusCode}');
       print('Get_Modules: ${response.body}');
@@ -124,7 +121,7 @@ class NoteViewModel extends ChangeNotifier {
       noteStatusCode = 0;
 
       http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Evaluations'),
+        Uri.parse('${authViewModel!.url}/Get_Evaluations'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'cycle': selectedClass?.CLSCYC,
@@ -162,7 +159,7 @@ class NoteViewModel extends ChangeNotifier {
       oldNotes = [];
       noteStatusCode = 0;
       http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Note'),
+        Uri.parse('${authViewModel!.url}/Get_Note'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'cycle': selectedClass?.CLSCYC,
@@ -209,7 +206,7 @@ class NoteViewModel extends ChangeNotifier {
       students = [];
       studentEvaluationStatusCode = 0;
       http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Student_Without_Evaluation'),
+        Uri.parse('${authViewModel!.url}/Get_Student_Without_Evaluation'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'cycle': selectedClass?.CLSCYC,
@@ -222,7 +219,7 @@ class NoteViewModel extends ChangeNotifier {
           'evaluation': selectedEvaluation?.EVANO,
         }),
       );
-      print("url sent: http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Student_Without_Evaluation");
+      print("url sent: ${authViewModel!.url}/Get_Student_Without_Evaluation");
       print(
         "ata sent: ${jsonEncode({'path': authViewModel!.selectedFolder?.DOSBDD, 'cycle': selectedClass?.CLSCYC, 'level': selectedClass?.CLSNIV, 'class': selectedClass?.CLSNO, 'speciality': selectedClass?.CLSSPC, 'year': authViewModel!.selectedYear?.ANENO, 'period': selectedPeriod?.PERNO, 'module': selectedModule?.MATNO, 'evaluation': selectedEvaluation?.EVANO})}",
       );
@@ -255,7 +252,6 @@ class NoteViewModel extends ChangeNotifier {
             );
             print('--: ${student.elvnom} ${student.elvprenom}');
           }
-          
 
           print('notes after adding new: ${notes?.length}');
         }
@@ -289,8 +285,7 @@ class NoteViewModel extends ChangeNotifier {
       for (var note in notes!.where(
         (n) =>
             oldNotes!.contains(n) &&
-            (n.NOTVALEUR != oldNotes!.firstWhere((old) => old == n).NOTVALEUR ||
-                n.SEMOBSERV != oldNotes!.firstWhere((old) => old == n).SEMOBSERV) &&
+            (n.NOTVALEUR != oldNotes!.firstWhere((old) => old == n).NOTVALEUR || n.SEMOBSERV != oldNotes!.firstWhere((old) => old == n).SEMOBSERV) &&
             n.NOTVALEUR != null &&
             n.NOTVALEUR! <= maxValue,
       )) {
@@ -388,11 +383,7 @@ class NoteViewModel extends ChangeNotifier {
         'observation': note.SEMOBSERV,
       };
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/New_Note'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/New_Note'), headers: headers, body: jsonEncode(body));
       print('New_Note ${note.NOTELV}: ${response.statusCode}');
       print('New_Note ${note.NOTELV}: ${response.body}');
       addNoteStatusCode = response.statusCode;
@@ -425,7 +416,7 @@ class NoteViewModel extends ChangeNotifier {
   //     };
   //     Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
   //     http.Response response = await http.post(
-  //       Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/New_Note'),
+  //       Uri.parse(authViewModel!.url+'/New_Note'),
   //       headers: headers,
   //       body: jsonEncode(body),
   //     );
@@ -458,11 +449,7 @@ class NoteViewModel extends ChangeNotifier {
         'observation': note.SEMOBSERV,
       };
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Modify_Note'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Modify_Note'), headers: headers, body: jsonEncode(body));
       print('Modify_Note ${note.NOTELV}: ${response.statusCode}');
       print('Modify_Note ${note.NOTELV}: ${response.body}');
       modifyNoteStatusCode = response.statusCode;
@@ -495,7 +482,7 @@ class NoteViewModel extends ChangeNotifier {
   //     };
   //     Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
   //     http.Response response = await http.post(
-  //       Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Modify_Note'),
+  //       Uri.parse(authViewModel!.url+'/Modify_Note'),
   //       headers: headers,
   //       body: jsonEncode(body),
   //     );
@@ -527,11 +514,7 @@ class NoteViewModel extends ChangeNotifier {
         'observation': deletedNote.SEMOBSERV,
       };
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Delete_Note'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Delete_Note'), headers: headers, body: jsonEncode(body));
 
       deleteNoteStatusCode = response.statusCode;
       notifyListeners();
@@ -562,7 +545,7 @@ class NoteViewModel extends ChangeNotifier {
     try {
       modulesGroupStatusCode = 0;
       http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Modules_Group'),
+        Uri.parse('${authViewModel!.url}/Get_Modules_Group'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'cycle': selectedClass?.CLSCYC,
@@ -592,7 +575,7 @@ class NoteViewModel extends ChangeNotifier {
     try {
       studentGroupObservationStatusCode = 0;
       http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Student_Group_Observation'),
+        Uri.parse('${authViewModel!.url}/Get_Student_Group_Observation'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'student': selectedStudentForObservation,
@@ -649,7 +632,7 @@ class NoteViewModel extends ChangeNotifier {
       };
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
       http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Modify_Student_Group_Observation'),
+        Uri.parse('${authViewModel!.url}/Modify_Student_Group_Observation'),
         headers: headers,
         body: jsonEncode(body),
       );

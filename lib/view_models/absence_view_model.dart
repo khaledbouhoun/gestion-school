@@ -6,6 +6,7 @@ import 'package:al_moiin/view_models/system_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+
 import '../models/absence.dart';
 import '../models/absence_type.dart';
 import '../models/class.dart';
@@ -14,6 +15,9 @@ class AbsenceViewModel extends ChangeNotifier {
   AuthViewModel? authViewModel;
   SystemViewModel? systemViewModel;
   AbsenceViewModel(this.authViewModel, this.systemViewModel);
+
+  // absenceTypes as json data
+  // {"01":"غياب غير مبرر"}
 
   List<AbsenceType> absenceTypes = [
     AbsenceType(TABNO: '01', TABNOM: 'غياب غير مبرر'),
@@ -46,10 +50,7 @@ class AbsenceViewModel extends ChangeNotifier {
     try {
       statusCode = 0;
       http.Response response = await http.post(
-        Uri.parse(
-          // 'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Absences?cycle=${selectedClass?.CLSCYC}&level=${selectedClass?.CLSNIV}&class=${selectedClass?.CLSNO}&speciality=${selectedClass?.CLSSPC}&year=${authViewModel!.selectedYear?.ANENO}&period=${selectedPeriod?.PERNO}&start=${DateFormat('yyyy-MM-dd').format(start)} 00:00&end=${DateFormat('yyyy-MM-dd').format(end)} 23:59',
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Absences',
-        ),
+        Uri.parse('${authViewModel!.url}/Get_Absences'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'cycle': selectedClass?.CLSCYC,
@@ -62,12 +63,15 @@ class AbsenceViewModel extends ChangeNotifier {
           'end': '${DateFormat('yyyy-MM-dd').format(end)} 23:59',
         }),
       );
-  
+      debugPrint(
+        "Request Body: ${jsonEncode({'path': authViewModel!.selectedFolder?.DOSBDD, 'cycle': selectedClass?.CLSCYC, 'level': selectedClass?.CLSNIV, 'class': selectedClass?.CLSNO, 'speciality': selectedClass?.CLSSPC, 'year': authViewModel!.selectedYear?.ANENO, 'period': selectedPeriod?.PERNO, 'start': '${DateFormat('yyyy-MM-dd').format(start)} 00:00', 'end': '${DateFormat('yyyy-MM-dd').format(end)} 23:59'})}",
+      );
+      debugPrint("Response Body: ${response.body}");
+
       statusCode = response.statusCode;
       if (statusCode == 200) {
         dynamic data = jsonDecode(response.body);
         absences = Absence.listFromJson(data['absences']);
-      
       }
       notifyListeners();
     } catch (err) {
@@ -101,11 +105,7 @@ class AbsenceViewModel extends ChangeNotifier {
         'eabjustif': newAbsence?.EABJUSTIF,
       };
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_New_Absences'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Get_New_Absences'), headers: headers, body: jsonEncode(body));
       print(response.body);
       addStatusCode = response.statusCode;
       notifyListeners();
@@ -131,11 +131,7 @@ class AbsenceViewModel extends ChangeNotifier {
         'eabjustif': modifiedAbsence?.EABJUSTIF,
       };
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Modify_Absences'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Get_Modify_Absences'), headers: headers, body: jsonEncode(body));
       modifStatusCode = response.statusCode;
       if (modifStatusCode == 201) {
         selectedAbsence?.EABTYPE = modifiedAbsence!.EABTYPE;
@@ -162,11 +158,7 @@ class AbsenceViewModel extends ChangeNotifier {
         'eabdate': deletedAbsence.EABDATE?.toIso8601String(),
       };
       Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
-      http.Response response = await http.post(
-        Uri.parse('http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Delete_Absences'),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Get_Delete_Absences'), headers: headers, body: jsonEncode(body));
       deleteStatusCode = response.statusCode;
       notifyListeners();
     } catch (err) {

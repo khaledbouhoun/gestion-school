@@ -1,14 +1,14 @@
 import 'dart:convert';
 
+import 'package:al_moiin/mixins/quran.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
+
 import '../models/class.dart';
 import '../models/period.dart';
 import '../models/student.dart';
 import '../models/tranche.dart';
 import 'auth_view_model.dart';
-import 'package:al_moiin/mixins/quran.dart';
-
-import 'package:http/http.dart' as http;
 
 class TrancheViewModel extends ChangeNotifier {
   AuthViewModel? authViewModel;
@@ -43,9 +43,7 @@ class TrancheViewModel extends ChangeNotifier {
     try {
       statusCode = 0;
       http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Tranche',
-        ),
+        Uri.parse('${authViewModel!.url}/Get_Tranche'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'cycle': selectedClass?.CLSCYC,
@@ -78,9 +76,7 @@ class TrancheViewModel extends ChangeNotifier {
     try {
       statusCode = 0;
       http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_TrancheByStudent',
-        ),
+        Uri.parse('${authViewModel!.url}/Get_TrancheByStudent'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'cycle': selectedClass?.CLSCYC,
@@ -103,11 +99,7 @@ class TrancheViewModel extends ChangeNotifier {
 
         var nav = SurraAyyat();
 
-        var result = nav.calcullate(
-          tranchesbystudent!.TRCSOURAA!,
-          tranchesbystudent!.TRCAYAA!,
-          tranchesbystudent!.TRCSENS!,
-        );
+        var result = nav.calcullate(tranchesbystudent!.TRCSOURAA!, tranchesbystudent!.TRCAYAA!, tranchesbystudent!.TRCSENS!);
         newTranche?.TRCSENS = tranchesbystudent!.TRCSENS!;
         newTranche?.TRCSOURADE = result.surraa;
         newTranche?.TRCAYADE = result.aya;
@@ -127,9 +119,7 @@ class TrancheViewModel extends ChangeNotifier {
       students = [];
       studentTrancheStatusCode = 0;
       http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Get_Student_Without_Tranche',
-        ),
+        Uri.parse('${authViewModel!.url}/Get_Student_Without_Tranche'),
         body: jsonEncode({
           'path': authViewModel!.selectedFolder?.DOSBDD,
           'cycle': selectedClass?.CLSCYC,
@@ -174,17 +164,8 @@ class TrancheViewModel extends ChangeNotifier {
         'observation': newTranche?.TRCOBS,
         'sens': newTranche?.TRCSENS,
       };
-      Map<String, String> headers = {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-      };
-      http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/New_Tranche',
-        ),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/New_Tranche'), headers: headers, body: jsonEncode(body));
       addStatusCode = response.statusCode;
       notifyListeners();
     } catch (err) {
@@ -213,17 +194,8 @@ class TrancheViewModel extends ChangeNotifier {
         'observation': modifiedTranche?.TRCOBS,
         'sens': modifiedTranche?.TRCSENS,
       };
-      Map<String, String> headers = {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-      };
-      http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Modify_Tranche',
-        ),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Modify_Tranche'), headers: headers, body: jsonEncode(body));
       modifyStatusCode = response.statusCode;
       print('Modify_Tranche: ${response.statusCode}');
       print('Modify_Tranche: ${response.body}');
@@ -262,17 +234,8 @@ class TrancheViewModel extends ChangeNotifier {
         'speciality': deletedTranche.TRCSPC,
         'student': deletedTranche.TRCELV,
       };
-      Map<String, String> headers = {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-      };
-      http.Response response = await http.post(
-        Uri.parse(
-          'http://${authViewModel!.ip_address}:${authViewModel!.port}/Delete_Tranche',
-        ),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      Map<String, String> headers = {'Content-type': 'application/json', 'Accept': 'application/json'};
+      http.Response response = await http.post(Uri.parse('${authViewModel!.url}/Delete_Tranche'), headers: headers, body: jsonEncode(body));
       print('Delete_Tranche: ${response.statusCode}');
       print('Delete_Tranche: ${response.body}');
       deleteStatusCode = response.statusCode;
@@ -293,8 +256,7 @@ class SurraAyyat with Quran {
 
   SurraAyyat();
 
-  List<Map<dynamic, dynamic>> get ayatOfSurra =>
-      ayat.where((a) => a['AYASOURA'] == surraa).toList();
+  List<Map<dynamic, dynamic>> get ayatOfSurra => ayat.where((a) => a['AYASOURA'] == surraa).toList();
 
   SurraAyyat calcullate(int surra, int aya, int sens) {
     surraa = surra;
@@ -308,10 +270,7 @@ class SurraAyyat with Quran {
     switch (sens) {
       // صعودا (next)
       case 1:
-        var nextAya = ayatOfSurra.firstWhere(
-          (a) => a['AYANO'] == aya + 1,
-          orElse: () => {},
-        );
+        var nextAya = ayatOfSurra.firstWhere((a) => a['AYANO'] == aya + 1, orElse: () => {});
 
         if (nextAya.isEmpty) {
           if (surra != firstSurra) {
@@ -330,10 +289,7 @@ class SurraAyyat with Quran {
       // نزولا (previous)
       case 2:
       case 3:
-        var nextAya = ayatOfSurra.firstWhere(
-          (a) => a['AYANO'] == aya + 1,
-          orElse: () => {},
-        );
+        var nextAya = ayatOfSurra.firstWhere((a) => a['AYANO'] == aya + 1, orElse: () => {});
 
         if (nextAya.isEmpty) {
           if (surra != lastSurra) {

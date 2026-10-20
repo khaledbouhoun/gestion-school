@@ -1,17 +1,23 @@
 import 'dart:convert';
+
 import 'package:al_moiin/models/folder.dart';
 import 'package:al_moiin/models/rubrique.dart';
 import 'package:al_moiin/models/school_year.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../devicehelper.dart';
 import '../models/access.dart';
 import '../models/user.dart';
-import '../devicehelper.dart';
 
 class AuthViewModel extends ChangeNotifier {
-  String ip_address = '192.168.1.65';
-  String port = '5050';
+  bool useDirectUrl = false;
+
+  String ip_address = '';
+  String port = '';
+
+  String get url => useDirectUrl ? ip_address : 'http://$ip_address:$port';
 
   String get licenseUrl => 'https://licenseactivation.softel.dz/api';
 
@@ -45,12 +51,12 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> getUsersAndFolders() async {
-    final url = Uri.parse('http://$ip_address:$port/getuserandfolder');
+    final urli = Uri.parse('$url/getuserandfolder');
     print("Fetching users and folders from: $url");
 
     try {
       statusCode = 0;
-      final response = await http.post(url);
+      final response = await http.post(urli);
       statusCode = response.statusCode;
 
       print("Response status: $statusCode");
@@ -59,9 +65,7 @@ class AuthViewModel extends ChangeNotifier {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
         users = data['users'] != null ? User.listFromJson(data['users']) : [];
-        folders = data['folders'] != null
-            ? Folder.listFromJson(data['folders'])
-            : [];
+        folders = data['folders'] != null ? Folder.listFromJson(data['folders']) : [];
 
         await _restoreOrSetDefaultUser();
         _selectDefaultFolder();
@@ -94,10 +98,7 @@ class AuthViewModel extends ChangeNotifier {
     }
 
     if (savedUserNo != null) {
-      selectedUser = users!.firstWhere(
-        (u) => u.USRNO == savedUserNo,
-        orElse: () => users!.first,
-      );
+      selectedUser = users!.firstWhere((u) => u.USRNO == savedUserNo, orElse: () => users!.first);
     } else {
       selectedUser = users!.first;
     }
@@ -117,11 +118,8 @@ class AuthViewModel extends ChangeNotifier {
     try {
       yearStatusCode = 0;
       // print("body: {'path': ${selectedFolder?.DOSBDD.replaceAll(r'\', r'\\')}}");
-      http.Response response = await http.post(
-        Uri.parse('http://$ip_address:$port/Get_School_Years'),
-        body: jsonEncode({'path': selectedFolder?.DOSBDD}),
-      );
-      print("url: http://$ip_address:$port/Get_School_Years");
+      http.Response response = await http.post(Uri.parse('$url/Get_School_Years'), body: jsonEncode({'path': selectedFolder?.DOSBDD}));
+      print("url: $url/Get_School_Years");
       print('body : ${jsonEncode({'System': selectedFolder?.DOSNOM})}');
       print('body : ${jsonEncode({'path': selectedFolder?.DOSBDD})}');
       print(response.body);
@@ -149,14 +147,8 @@ class AuthViewModel extends ChangeNotifier {
     try {
       loginStatusCode = 0;
       notifyListeners();
-      http.Response response = await http.post(
-        Uri.parse(
-          'http://$ip_address:$port/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}',
-        ),
-      );
-      print(
-        "url: http://$ip_address:$port/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}",
-      );
+      http.Response response = await http.post(Uri.parse('$url/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}'));
+      print("url: $url/verify_standard?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}");
       print(response.body);
       print(response.statusCode);
       if (response.statusCode == 200) {
@@ -175,11 +167,7 @@ class AuthViewModel extends ChangeNotifier {
   Future getRubriques() async {
     try {
       statusCode = 0;
-      http.Response response = await http.post(
-        Uri.parse(
-          'http://$ip_address:$port/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}',
-        ),
-      );
+      http.Response response = await http.post(Uri.parse('$url/get_rubriques?user=${selectedUser!.USRNO}&folder=${selectedFolder!.DOSNO}'));
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         rubriques = Rubrique.listFromJson(data['rubriques']);
@@ -197,14 +185,13 @@ class AuthViewModel extends ChangeNotifier {
     try {
       changePasswordStatusCode = 0;
       notifyListeners();
-      Map<String, dynamic> body = {
-        'password': newPassword,
-        'user': selectedUser!.USRNO,
-      };
+      Map<String, dynamic> body = {'password': newPassword, 'user': selectedUser!.USRNO};
       http.Response response = await http.post(
-        Uri.parse('http://$ip_address:$port/change_password'),
-        body: body,
+        Uri.parse('$url/change_password'),
+        body: jsonEncode(body),
+        headers: {'Content-Type': 'application/json'},
       );
+
       changePasswordStatusCode = response.statusCode;
       if (response.statusCode == 200) {
         selectedUser!.USRPASSW = newPassword;

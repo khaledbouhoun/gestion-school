@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'delete_warning_dialog.dart';
 
@@ -110,57 +111,93 @@ class AbsenceWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                Tooltip(
-                  message: 'حذف النقطة و العلامة',
-                  child: GestureDetector(
-                    onTap: () {
-                      if (authProvider.selectedYear!.ANECLOSE == 0 && absenceProvider.selectedPeriod!.ANPCLOSE == 0) {
-                        print("systemProvider.dateOfDay: ${systemProvider.dateOfDay}");
-                        print("absence.EABDATE: ${absence.EABDATE}");
-                        if ((DateTime(
-                              systemProvider.dateOfDay!.year,
-                              systemProvider.dateOfDay!.month,
-                              systemProvider.dateOfDay!.day,
-                            ).compareTo(DateTime(absence.EABDATE!.year, absence.EABDATE!.month, absence.EABDATE!.day))) ==
-                            0) {
-                          DeleteWarningDialog.showDeleteWarningDialog(context, () async {
-                            await absenceProvider.deleteAbsence(absence);
-                            if (absenceProvider.deleteStatusCode == 200) {
-                              Toast(
-                                context: context,
-                                title: 'تمت الحذف بنجاح',
-                                style: ToastificationStyle.minimal,
-                                type: ToastificationType.success,
-                              );
-                              Navigator.pop(context);
-                              absenceProvider.getAbsences();
+                Row(
+                  spacing: 20,
+                  children: [
+                    Tooltip(
+                      message: 'حذف النقطة و العلامة',
+                      child: GestureDetector(
+                        onTap: () {
+                          if (authProvider.selectedYear!.ANECLOSE == 0 && absenceProvider.selectedPeriod!.ANPCLOSE == 0) {
+                            print("systemProvider.dateOfDay: ${systemProvider.dateOfDay}");
+                            print("absence.EABDATE: ${absence.EABDATE}");
+                            if ((DateTime(
+                                  systemProvider.dateOfDay!.year,
+                                  systemProvider.dateOfDay!.month,
+                                  systemProvider.dateOfDay!.day,
+                                ).compareTo(DateTime(absence.EABDATE!.year, absence.EABDATE!.month, absence.EABDATE!.day))) ==
+                                0) {
+                              DeleteWarningDialog.showDeleteWarningDialog(context, () async {
+                                await absenceProvider.deleteAbsence(absence);
+                                if (absenceProvider.deleteStatusCode == 200) {
+                                  Toast(
+                                    context: context,
+                                    title: 'تمت الحذف بنجاح',
+                                    style: ToastificationStyle.minimal,
+                                    type: ToastificationType.success,
+                                  );
+                                  Navigator.pop(context);
+                                  absenceProvider.getAbsences();
+                                } else {
+                                  Toast(
+                                    context: context,
+                                    title: 'تعذر الإتصال بالخادم',
+                                    style: ToastificationStyle.minimal,
+                                    type: ToastificationType.error,
+                                  );
+                                }
+                              });
                             } else {
                               Toast(
                                 context: context,
-                                title: 'تعذر الإتصال بالخادم',
+                                title: 'لا يمكنك حذف هدا الغياب',
                                 style: ToastificationStyle.minimal,
                                 type: ToastificationType.error,
                               );
                             }
-                          });
-                        } else {
-                          Toast(
-                            context: context,
-                            title: 'لا يمكنك حذف هدا الغياب',
-                            style: ToastificationStyle.minimal,
-                            type: ToastificationType.error,
-                          );
-                        }
-                      }
-                    },
-                    child: Icon(
-                      size: 20.0,
-                      Icons.delete_rounded,
-                      color: authProvider.selectedYear!.ANECLOSE == 0 && absenceProvider.selectedPeriod!.ANPCLOSE == 0
-                          ? Colors.red
-                          : Colors.grey,
+                          }
+                        },
+                        child: Icon(
+                          size: 25,
+                          Icons.delete_rounded,
+                          color: authProvider.selectedYear!.ANECLOSE == 0 && absenceProvider.selectedPeriod!.ANPCLOSE == 0
+                              ? Colors.red
+                              : Colors.grey,
+                        ),
+                      ),
                     ),
-                  ),
+                    // call phone number
+                    Tooltip(
+                      message: 'اتصل بولي الأمر',
+                      child: GestureDetector(
+                        onTap: () async {
+                          if (absence.ELVtel1 == null && absence.ELVtel2 == null) {
+                            Toast(
+                              context: context,
+                              title: 'لا يوجد رقم هاتف',
+                              style: ToastificationStyle.minimal,
+                              type: ToastificationType.error,
+                            );
+                            return;
+                          }
+                          final Uri uri = Uri(scheme: 'tel', path: absence.ELVtel1 ?? absence.ELVtel2 ?? '');
+
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          } else {
+                            throw Exception('Could not launch $absence.ELVNUMT');
+                          }
+                        },
+                        child: Icon(
+                          size: 25,
+                          Icons.phone,
+                          color: authProvider.selectedYear!.ANECLOSE == 0 && absenceProvider.selectedPeriod!.ANPCLOSE == 0
+                              ? Colors.green
+                              : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

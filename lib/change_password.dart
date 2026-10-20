@@ -168,9 +168,18 @@ class ChangePassword extends StatelessWidget {
               String hashedNewPassword = convertedBytes.toString().toUpperCase();
               await authProvider.changePassword(hashedNewPassword);
               if (authProvider.changePasswordStatusCode == 200) {
-                Toast(context: context, title: 'تم التعديل بنجاح', style: ToastificationStyle.minimal, type: ToastificationType.success);
+                toastification.show(
+                  context: context,
+                  title: const Text('تم التعديل بنجاح'),
+                  type: ToastificationType.success,
+                  style: ToastificationStyle.minimal,
+                );
+
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  Navigator.pop(context);
+                });
               } else {
-                Toast(context: context, title: 'تعذر الإتصال بالخادم', style: ToastificationStyle.minimal, type: ToastificationType.error);
+                Toast(title: 'تعذر الإتصال بالخادم', style: ToastificationStyle.minimal, type: ToastificationType.error);
               }
             }
           }
