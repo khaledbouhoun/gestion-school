@@ -274,7 +274,7 @@ class TranchesPage extends State<Tranches> with Quran {
                             : trancheProvider.statusCode == 404
                             ? Center(
                                 child: Text(
-                                  'لا توجد تحصيلات قرآنية',
+                                  'لا يوجد تحصيل',
                                   style: TextStyle(fontSize: width * 0.05),
                                 ),
                               )

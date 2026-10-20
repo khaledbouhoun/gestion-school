@@ -173,6 +173,7 @@ class Login extends StatelessWidget {
                                       ),
                                       child: TextFormField(
                                         controller: password,
+                                        autofocus: true,
                                         keyboardType: TextInputType.text,
                                         obscureText: provider.hide,
                                         decoration: InputDecoration(
