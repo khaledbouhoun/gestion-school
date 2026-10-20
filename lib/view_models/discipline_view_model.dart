@@ -151,12 +151,21 @@ class DisciplineViewModel extends ChangeNotifier {
     try {
       addStatusCode = 0;
       notifyListeners();
+
+      DateTime date = DateTime(
+        newDiscipline!.DEVDATE.year,
+        newDiscipline!.DEVDATE.month,
+        newDiscipline!.DEVDATE.day,
+        DateTime.now().hour,
+        DateTime.now().minute,
+      );
+
       Map<String, dynamic> body = {
         'path': authViewModel!.selectedFolder?.DOSBDD,
         'student': newDiscipline?.DEVELV,
         'year': newDiscipline?.DEVANE,
         'period': newDiscipline?.DEVPER,
-        'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+        'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(date),
         'discipline': newDiscipline?.DEVDEC,
         'observation': newDiscipline?.DEVOBSERV,
       };
